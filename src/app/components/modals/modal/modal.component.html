@@ -1,0 +1,149 @@
+<div class="modal-content p-3">
+  <div *ngIf="laburoCopy" class="mb-3">
+    <label class="mb-2">Cliente:</label>
+    <input
+      type="text"
+      [(ngModel)]="laburoCopy.data.cliente"
+      class="form-control mb-2"
+    />
+
+    <label class="mb-2">Fecha Ingreso:</label>
+    <input
+      [(ngModel)]="laburoCopy.data.fecha"
+      type="date"
+      class="form-control mb-2"
+    />
+
+    <label class="mb-2">Fecha de Entrega:</label>
+    <input
+      [(ngModel)]="laburoCopy.data.fechaEntrega"
+      type="date"
+      class="form-control mb-2"
+    />
+
+    <label class="mb-2">Trabajo:</label>
+    <input
+      type="text"
+      [(ngModel)]="laburoCopy.data.trabajo"
+      class="form-control mb-2"
+    />
+
+    <label class="mb-2">Detalle:</label>
+    <input
+      type="text"
+      [(ngModel)]="laburoCopy.data.detalle"
+      class="form-control mb-2"
+    />
+
+    <label class="mb-2">Total:</label>
+    <input
+      type="number"
+      [(ngModel)]="laburoCopy.data.precio"
+      (ngModelChange)="checkValue('precio')"
+      class="form-control mb-2"
+    />
+
+    <label class="mb-2">Seña:</label>
+    <input
+      type="number"
+      [(ngModel)]="laburoCopy.data.sena"
+      (ngModelChange)="checkValue('sena')"
+      class="form-control mb-2"
+    />
+
+    <label class="mb-2">Caja Seña:</label>
+    <select
+      [(ngModel)]="laburoCopy.data.cajaSena"
+      id="caja"
+      class="form-control mb-2"
+    >
+      <option value="efectivo">Efectivo</option>
+      <option value="transferencia">Transferencia</option>
+    </select>
+
+    <span *ngIf="laburoCopy.data.cajaSena === 'transferencia'">
+      <label class="mb-2" for="cuentass">Cuentas Seña</label>
+      <select
+        class="form-control mb-2"
+        id="cuentass"
+        [(ngModel)]="laburoCopy.data.cuentaSena"
+      >
+        <option *ngFor="let cuenta of cuentas" [value]="cuenta.id">
+          {{ cuenta.data.nombre }}
+        </option>
+      </select>
+      <div class="mt-3 mb-3">
+        <label class="form-label" for="customFile">Comprobante</label>
+        <input
+          (change)="onSelectFile($event, 'seña')"
+          type="file"
+          accept=".jpg, .jpeg, .png"
+          class="form-control"
+          id="customFile"
+        />
+      </div>
+    </span>
+
+    <span *ngIf="laburo.data.pagoEfectivo">
+      <label class="mb-2">Pago final efectivo:</label>
+      <input
+        type="number"
+        [(ngModel)]="laburoCopy.data.pagoEfectivo"
+        (ngModelChange)="checkValue('pagoEfectivo')"
+        class="form-control mb-2"
+      />
+    </span>
+
+    <label class="mb-2">Pago final transferecia:</label>
+    <input
+      type="number"
+      [(ngModel)]="laburoCopy.data.pago"
+      (ngModelChange)="checkValue('pago')"
+      class="form-control mb-2"
+    />
+
+    <span
+      *ngIf="
+        laburoCopy.data.cajaFinal === 'transferencia' ||
+        laburoCopy.data.pago > 0
+      "
+    >
+      <label class="mb-2" for="cuentass">Cuentas Final</label>
+      <select
+        class="form-control mb-2"
+        id="cuentass"
+        [(ngModel)]="laburoCopy.data.cuentaFinal"
+      >
+        <option *ngFor="let cuenta of cuentas" [value]="cuenta.id">
+          {{ cuenta.data.nombre }}
+        </option>
+      </select>
+
+      <div class="mt-3 mb-3">
+        <label class="form-label" for="customFile">Comprobante</label>
+        <input
+          (change)="onSelectFile($event, 'comprobantePago')"
+          type="file"
+          accept=".jpg, .jpeg, .png"
+          class="form-control"
+          id="customFile"
+        />
+      </div>
+    </span>
+
+    <label *ngIf="laburoCopy.data.comentario" class="mb-2">Comentario:</label>
+    <input
+      *ngIf="laburoCopy.data.comentario"
+      type="text"
+      [(ngModel)]="laburoCopy.data.comentario"
+      class="form-control mb-2"
+    />
+  </div>
+
+  <button type="button" class="btn btn-success mb-2" (click)="confirmar()">
+    Confirmar Modificación
+  </button>
+  <button type="button" class="btn btn-danger" (click)="cancelar()">
+    Cancelar
+  </button>
+</div>

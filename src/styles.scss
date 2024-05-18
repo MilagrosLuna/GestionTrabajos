@@ -1,0 +1,24 @@
+/* You can add global styles to this file, and also import other style files */
+@import "@fortawesome/fontawesome-free/scss/fontawesome.scss";
+@import "@fortawesome/fontawesome-free/scss/solid.scss";
+@import "@fortawesome/fontawesome-free/scss/regular.scss";
+@import "@fortawesome/fontawesome-free/scss/brands.scss";
+
+@import "mdb-angular-ui-kit/assets/scss/mdb.scss";
+.contenedor {
+  background-color: #eee;
+}
+
+.invalid {
+  color: red;
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+.gradient-custom-2 {
+  background: linear-gradient(to bottom, #f4291f, #f1e575);
+}
+
+.gradient-custom-3 {
+  background: linear-gradient(to bottom, #f1e575, #f4291f);
+}

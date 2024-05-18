@@ -1,0 +1,18 @@
+<div id="notfound">
+  <div class="notfound">
+    <div class="notfound-404">
+      <h1>Oops!</h1>
+    </div>
+    <h2>404 - Página no encontrada</h2>
+    <p>
+      La página que estás buscando podría haber sido eliminada, haber cambiado
+      de nombre o estar temporalmente no disponible.
+    </p>
+    <div *ngIf="logueado">
+      <a href="/home/alta">Ir a la página de inicio</a>
+    </div>
+    <div *ngIf="!logueado">
+      <a href="/login">Ir a la página de inicio</a>
+    </div>
+  </div>
+</div>

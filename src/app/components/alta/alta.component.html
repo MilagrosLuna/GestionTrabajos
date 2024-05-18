@@ -1,0 +1,269 @@
+<div class="container py-5 h-100">
+  <div class="row d-flex justify-content-center align-items-center h-100">
+    <div class="card rounded-6 text-black">
+      <div class="card-body p-md-5 mx-md-4">
+        <h4 class="text-center mb-1 pb-1">Cargar Trabajo</h4>
+        <form (ngSubmit)="onSubmit()" [formGroup]="form">
+          <div class="m-3">
+            <mdb-form-control>
+              <input
+                mdbInput
+                type="text"
+                id="cliente"
+                class="form-control"
+                formControlName="cliente"
+              />
+              <label mdbLabel class="form-label" for="cliente">Cliente</label>
+            </mdb-form-control>
+            <div *ngIf="form.controls['cliente'].errors != null">
+              <small
+                class="invalid"
+                *ngIf="
+                  form.controls['cliente'].errors!['required'] &&
+                  form.controls['cliente'].touched
+                "
+                >Debe ingresar el nombre del cliente.</small
+              >
+            </div>
+          </div>
+
+          <div class="m-3">
+            <mdb-form-control>
+              <input
+                mdbInput
+                type="date"
+                id="fecha"
+                class="form-control"
+                formControlName="fecha"
+              />
+              <label mdbLabel class="form-label" for="fecha">Fecha</label>
+            </mdb-form-control>
+            <div *ngIf="form.controls['fecha'].errors != null">
+              <small
+                class="invalid"
+                *ngIf="
+                  form.controls['fecha'].errors!['required'] &&
+                  form.controls['fecha'].touched
+                "
+                >Debe seleccionar una fecha.</small
+              >
+            </div>
+          </div>
+
+          <div class="m-3">
+            <mdb-form-control>
+              <input
+                mdbInput
+                type="date"
+                id="fechaEntrega"
+                class="form-control"
+                formControlName="fechaEntrega"
+              />
+              <label mdbLabel class="form-label" for="fechaEntrega"
+                >Fecha de entrega</label
+              >
+            </mdb-form-control>
+            <div *ngIf="form.controls['fechaEntrega'].errors != null">
+              <small
+                class="invalid"
+                *ngIf="
+                  form.controls['fechaEntrega'].errors!['required'] &&
+                  form.controls['fechaEntrega'].touched
+                "
+                >Debe seleccionar una fecha.</small
+              >
+            </div>
+          </div>
+
+          <div class="m-3">
+            <mdb-form-control>
+              <input
+                mdbInput
+                type="text"
+                id="trabajo"
+                class="form-control"
+                formControlName="trabajo"
+              />
+              <label mdbLabel class="form-label" for="trabajo">Trabajo</label>
+            </mdb-form-control>
+            <div *ngIf="form.controls['trabajo'].errors != null">
+              <small
+                class="invalid"
+                *ngIf="
+                  form.controls['trabajo'].errors!['required'] &&
+                  form.controls['trabajo'].touched
+                "
+                >Debe ingresar el trabajo a realizar.</small
+              >
+            </div>
+          </div>
+
+          <div class="m-3">
+            <mdb-form-control>
+              <textarea
+                mdbInput
+                id="detalle"
+                class="form-control"
+                formControlName="detalle"
+              ></textarea>
+              <label mdbLabel class="form-label" for="detalle">Detalle</label>
+            </mdb-form-control>
+            <div *ngIf="form.controls['detalle'].errors != null">
+              <small
+                class="invalid"
+                *ngIf="
+                  form.controls['detalle'].errors!['required'] &&
+                  form.controls['detalle'].touched
+                "
+                >Debe ingresar un detalle.</small
+              >
+            </div>
+          </div>
+
+          <div class="m-3">
+            <mdb-form-control>
+              <input
+                mdbInput
+                type="number"
+                id="precio"
+                class="form-control"
+                formControlName="precio"
+              />
+              <label mdbLabel class="form-label" for="precio">Precio</label>
+            </mdb-form-control>
+            <div *ngIf="form.controls['precio'].errors != null">
+              <small
+                class="invalid"
+                *ngIf="
+                  form.controls['precio'].errors!['required'] &&
+                  form.controls['precio'].touched
+                "
+                >Debe ingresar un precio.</small
+              >
+            </div>
+          </div>
+
+          <div class="m-3">
+            <mdb-form-control>
+              <input
+                mdbInput
+                type="number"
+                id="seña"
+                class="form-control"
+                formControlName="seña"
+              />
+              <label mdbLabel class="form-label" for="seña">Seña</label>
+            </mdb-form-control>
+            <div *ngIf="form.controls['seña'].errors != null">
+              <small
+                class="invalid"
+                *ngIf="
+                  form.controls['seña'].errors!['required'] &&
+                  form.controls['seña'].touched
+                "
+                >Debe ingresar una seña.</small
+              >
+            </div>
+          </div>
+
+          <div class="m-3">
+            <mdb-form-control>
+              <select
+                mdbInput
+                id="caja"
+                class="form-control"
+                formControlName="caja"
+              >
+                <option value="efectivo">Efectivo</option>
+                <option value="transferencia">Transferencia</option>
+              </select>
+              <label mdbLabel class="form-label" for="caja">Caja</label>
+            </mdb-form-control>
+            <div *ngIf="form.controls['caja'].errors != null">
+              <small
+                class="invalid"
+                *ngIf="
+                  form.controls['caja'].errors!['required'] &&
+                  form.controls['caja'].touched
+                "
+                >Debe seleccionar una opción.</small
+              >
+            </div>
+          </div>
+
+          <div
+            class="m-3"
+            *ngIf="form.controls['caja'].value == 'transferencia'"
+          >
+            <mdb-form-control>
+              <select
+                mdbInput
+                class="form-control"
+                id="cuentass"
+                formControlName="cuenta"
+              >
+                <option *ngFor="let cuenta of cuentas" [value]="cuenta.id">
+                  {{ cuenta.data.nombre }}
+                </option>
+              </select>
+              <label mdbLabel class="form-label" for="cuentass">Cuentas</label>
+            </mdb-form-control>
+
+            <div class="mt-3 mb-3">
+              <label class="form-label" for="customFile">Comprobante</label>
+              <input
+                (change)="onSelectFile($event)"
+                type="file"
+                accept=".jpg, .jpeg, .png"
+                class="form-control"
+                id="customFile"
+                formControlName="comprobante"
+              />
+            </div>
+
+            <button
+              type="button"
+              class="btn btn-secondary m-2"
+              (click)="mostrarCampoNuevaCuenta = true"
+            >
+              Agregar nueva cuenta
+            </button>
+
+            <div *ngIf="mostrarCampoNuevaCuenta">
+              <input
+                mdbInput
+                type="text"
+                id="nuevaCuenta"
+                class="form-control"
+                formControlName="nuevaCuenta"
+              />
+              <button
+                type="button"
+                class="btn btn-success m-2"
+                (click)="agregarCuenta()"
+              >
+                Confirmar
+              </button>
+              <button
+                type="button"
+                class="btn btn-danger m-2"
+                (click)="mostrarCampoNuevaCuenta = false"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+
+          <div class="text-center pt-1 mb-1 pb-1">
+            <button
+              class="btn btn-primary btn-block fa-lg gradient-custom-2 mb-3"
+              type="submit"
+            >
+              cargar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

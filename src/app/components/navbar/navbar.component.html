@@ -1,0 +1,113 @@
+<nav class="navbar fixed-top navbar-expand-lg navbar-light bg-light">
+  <div class="container">
+    <a class="navbar-brand me-2" href="/home">
+      <img
+        src="../../../assets/logo.png"
+        height="16"
+        alt=""
+        loading="lazy"
+        style="margin-top: -1px"
+      />
+    </a>
+    <button
+      class="navbar-toggler"
+      type="button"
+      (click)="buttonsNav.toggle()"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
+    >
+      <i class="fas fa-bars"></i>
+    </button>
+    <div
+      class="collapse navbar-collapse"
+      id="navbarButtonsExample"
+      mdbCollapse
+      #buttonsNav="mdbCollapse"
+    >
+      <!-- Left links -->
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <div *ngIf="logueado">
+            <a class="nav-link" href="/home/alta">Inicio</a>
+          </div>
+          <div *ngIf="!logueado">
+            <a class="nav-link" href="/login">Inicio</a>
+          </div>
+        </li>
+      </ul>
+      <!-- Left links -->
+      <div class="d-flex align-items-center">
+        <div *ngIf="logueado">
+          <button
+            *ngIf="esAdmin"
+            type="button"
+            class="btn btn-link px-3 me-2"
+            (click)="goTo('home/caja')"
+          >
+            caja
+          </button>
+          <button
+            *ngIf="esAdmin"
+            type="button"
+            class="btn btn-link px-3 me-2"
+            (click)="goTo('home/presupuestos')"
+          >
+            presupuestos
+          </button>
+          <button
+            *ngIf="esAdmin"
+            type="button"
+            class="btn btn-link px-3 me-2"
+            (click)="goTo('home/graficos')"
+          >
+            Ver graficos
+          </button>
+          <button
+            *ngIf="esAdmin"
+            type="button"
+            class="btn btn-link px-3 me-2"
+            (click)="goTo('home/cuentas')"
+          >
+            Alta Cuentas
+          </button>
+          <button
+            type="button"
+            class="btn btn-link px-3 me-2"
+            (click)="goTo('home/listado')"
+          >
+            Ver trabajos
+          </button>
+          <button
+            type="button"
+            class="btn btn-link px-3 me-2"
+            (click)="goTo('home/alta')"
+          >
+            Cargar trabajos
+          </button>
+          <button type="button" class="btn btn-danger me-3" (click)="logOut()">
+            cerrar sesion
+          </button>
+        </div>
+        <div *ngIf="!logueado">
+          <button
+            type="button"
+            class="btn btn-link px-3 me-2"
+            (click)="goTo('login')"
+          >
+            Iniciar sesión
+          </button>
+          <button
+            type="button"
+            class="btn btn-primary me-3"
+            (click)="goTo('register')"
+          >
+            Registrarse gratis
+          </button>
+        </div>
+      </div>
+    </div>
+    <!-- Collapsible wrapper -->
+  </div>
+  <!-- Container wrapper -->
+</nav>
+<!-- Navbar -->

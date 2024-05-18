@@ -1,0 +1,17 @@
+<div class="modal-content p-3">
+  <div *ngIf="laburoCopy" class="mb-3">
+    <label class="mb-2">Comentario:</label>
+
+    <textarea
+      [(ngModel)]="laburoCopy.data.comentario"
+      class="form-control mb-2"
+    ></textarea>
+  </div>
+
+  <button type="button" class="btn btn-success mb-2" (click)="confirmar()">
+    Confirmar Comentario
+  </button>
+  <button type="button" class="btn btn-danger" (click)="cancelar()">
+    Cancelar
+  </button>
+</div>

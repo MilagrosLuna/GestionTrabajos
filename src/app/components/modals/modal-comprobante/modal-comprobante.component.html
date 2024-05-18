@@ -1,0 +1,6 @@
+<div *ngIf="!pago">
+  <img [src]="laburo.data.comprobanteSena" class="img-fluid p-2" alt="Comprobante" />
+</div>
+<div *ngIf="pago">
+  <img [src]="laburo.data.comprobantePago" class="img-fluid p-2" alt="Comprobante" />
+</div>

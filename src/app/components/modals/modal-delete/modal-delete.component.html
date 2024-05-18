@@ -1,0 +1,32 @@
+<div class="modal-content p-3">
+  <div class="mb-3">
+    <h6 class="mb-2">Cliente: {{ laburo.data.cliente }}</h6>
+    <p class="mb-2">Fecha: {{ laburo.data.fecha }}</p>
+    <p class="mb-2">Fecha de Entrega: {{ laburo.data.fechaEntrega }}</p>
+    <p class="mb-2">Trabajo: {{ laburo.data.trabajo }}</p>
+    <p class="mb-2">Detalle: {{ laburo.data.detalle }}</p>
+    <p class="mb-2">Precio: {{ laburo.data.precio }}</p>
+    <p class="mb-2">Seña: {{ laburo.data.sena }}</p>
+
+    <span
+      *ngIf="laburo.data.caja === 'transferencia'"
+      class="transferencia-color"
+    >
+      <p class="mb-2">Caja: {{ laburo.data.caja }}</p>
+    </span>
+
+    <span *ngIf="laburo.data.caja === 'efectivo'" class="efectivo-color">
+      <p class="mb-0">Caja: {{ laburo.data.caja }}</p>
+    </span>
+
+    <span *ngIf="laburo.data.caja === 'transferencia'">
+      <p class="mb-0">Cuenta: {{ laburo.data.cuentaNombre }}</p>
+    </span>
+  </div>
+  <button type="button" class="btn btn-success mb-2" (click)="confirmar()">
+    Confirmar Eliminar
+  </button>
+  <button type="button" class="btn btn-danger" (click)="cancelar()">
+    Cancelar
+  </button>
+</div>

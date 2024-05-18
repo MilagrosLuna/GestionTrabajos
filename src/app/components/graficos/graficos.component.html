@@ -1,0 +1,16 @@
+<div class="container py-5">
+  <div class="card">
+    <div class="card-header">
+      <h2>Grafico Precios</h2>
+    </div>
+    <div class="card-body">
+      <input type="date" [(ngModel)]="fechaInicio" (change)="filtrarPorFecha()" />
+      <input type="date" [(ngModel)]="fechaFin" (change)="filtrarPorFecha()" />
+
+      <div echarts [options]="chartOption1" id="1" class="demo-chart"></div>
+      <button class="btn btn-primary mt-3" (click)="exportPDF('1', '')">
+        Descargar como PDF
+      </button>
+    </div>
+  </div>
+</div>

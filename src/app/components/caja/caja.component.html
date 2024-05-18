@@ -1,0 +1,42 @@
+<div class="container py-5">
+  <div class="card shadow">
+    <div class="card-header bg-primary text-white">
+      <h2>Caja</h2>
+    </div>
+    <div *ngIf="loading" class="container py-5">
+      <div class="text-center">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Cargando...</span>
+        </div>
+      </div>
+    </div>
+    <div *ngIf="!loading" class="card-body">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">Saldo caja efectivo: {{ saldo | currency }}</h4>
+        <button (click)="retirarDinero()" class="btn btn-primary">
+          Retirar dinero
+        </button>
+      </div>
+      <hr />
+      <div
+        *ngFor="let movimiento of movimientos"
+        class="col mb-3 p-3 border rounded"
+        [ngClass]="{
+          'credito ': movimiento.data.tipo === 'credito',
+          'debito ': movimiento.data.tipo === 'debito'
+        }"
+      >
+        <p class="mb-0">
+          <strong>Fecha:</strong>
+          {{ movimiento.data.fecha | date : "dd/MM/yyyy" }}
+        </p>
+        <p class="mb-0">
+          <strong>Monto:</strong> {{ movimiento.data.monto | currency }}
+        </p>
+        <p class="mb-0">
+          <strong>Detalle:</strong> {{ movimiento.data.detalle }}
+        </p>
+      </div>
+    </div>
+  </div>
+</div>

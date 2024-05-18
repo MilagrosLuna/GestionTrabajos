@@ -1,0 +1,71 @@
+<div class="modal-content p-3">
+  <div *ngIf="laburoCopy" class="mb-3">
+    <h5 class="mb-2">Valor restante ${{ valorRestante }}</h5>
+
+    <input
+      type="checkbox"
+      [(ngModel)]="transferencia"
+      (ngModelChange)="checkValue('transferencia')"
+      class="form-check-input"
+    />
+    <label class="mb-2">Transferencia</label>
+
+    <br />
+    <input
+      type="checkbox"
+      [(ngModel)]="efectivo"
+      (ngModelChange)="checkValue('efectivo')"
+      class="form-check-input"
+    />
+    <label class="mb-2">Efectivo</label>
+
+    <br />
+
+    <span *ngIf="efectivo">
+      <label class="mb-2">Pago Efectivo:</label>
+      <input
+        type="number"
+        [(ngModel)]="laburoCopy.data.pagoEfectivo"
+        (ngModelChange)="checkValue('pago')"
+        class="form-control mb-2"
+    /></span>
+
+    <span *ngIf="transferencia">
+      <label class="mb-2">Pago transferencia:</label>
+      <input
+        type="number"
+        [(ngModel)]="laburoCopy.data.pago"
+        (ngModelChange)="checkValue('pago')"
+        class="form-control mb-2"
+      />
+      <label class="mb-2" for="cuentass">Cuentas</label>
+      <select
+        class="form-control mb-2"
+        id="cuentass"
+        [(ngModel)]="laburoCopy.data.cuentaFinal"
+      >
+        <option *ngFor="let cuenta of cuentas" [value]="cuenta.id">
+          {{ cuenta.data.nombre }}
+        </option>
+      </select>
+
+      <div class="mt-3 mb-3">
+        <label class="form-label" for="customFile">Comprobante</label>
+        <input
+          (change)="onSelectFile($event)"
+          type="file"
+          accept=".jpg, .jpeg, .png"
+          class="form-control"
+          id="customFile"
+        />
+      </div>
+    </span>
+  </div>
+
+  <button type="button" class="btn btn-success mb-2" (click)="confirmar()">
+    Confirmar Modificación
+  </button>
+  <button type="button" class="btn btn-danger" (click)="cancelar()">
+    Cancelar
+  </button>
+</div>

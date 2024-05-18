@@ -1,0 +1,80 @@
+<footer class="bg-light text-center text-white">
+  <!-- Grid container -->
+  <div class="bg-light container p-4 pb-0">
+    <div class="row mb-4">
+      <!-- Section: Social media and info -->
+      <section class="col">
+        <div class="text-center mb-3" style="color: rgba(0, 0, 0, 0.703)">
+          <h5 class="text-uppercase">Artes Graficas Phoenix</h5>
+          <p>Mariano Alegre 3200, Monte grande, Bs. As. Argentina</p>
+          <p>Teléfono: 11-4084-3420</p>
+          <p>Email: artesgraficasphoenix&#64;gmail.com</p>
+          <img src="../assets/logo.png" alt="" width="150" height="100" />
+        </div>
+        <!-- Facebook -->
+        <a
+          class="btn btn-primary btn-floating m-1"
+          style="background-color: #3b5998"
+          href="https://www.facebook.com/ARTEGRAFICAPHOENIX"
+          target="_blank"
+          role="button"
+          ><i class="fab fa-facebook-f"></i
+        ></a>
+        <!-- Instagram -->
+        <a
+          class="btn btn-primary btn-floating m-1"
+          style="background-color: #ac2bac"
+          href="https://www.instagram.com/artesgraficasphoenix/"
+          target="_blank"
+          role="button"
+          ><i class="fab fa-instagram"></i
+        ></a>
+      </section>
+      <!--Section: Form contact -->
+      <section class="col">
+        <div class="text-center mb-3" style="color: rgba(0, 0, 0, 0.703)">
+          <h5>Contacto</h5>
+          Por favor ingrese sus datos, nos pondremos en contacto lo antes
+          posible.
+        </div>
+
+        <form [formGroup]="contactForm" (ngSubmit)="onSubmit($event)">
+          <input
+            formControlName="name"
+            type="text"
+            class="form-control mb-3"
+            placeholder="Tu nombre"
+            required
+          />
+          <input
+            formControlName="email"
+            type="email"
+            class="form-control mb-3"
+            placeholder="Tu correo electrónico"
+            required
+          />
+          <textarea
+            formControlName="message"
+            class="form-control mb-3"
+            placeholder="Tu mensaje"
+            required
+          ></textarea>
+          <button type="submit" class="btn btn-primary">Enviar</button>
+        </form>
+      </section>
+    </div>
+  </div>
+  <!-- Grid container -->
+
+  <!-- Copyright -->
+  <div class="text-center p-3" style="background-color: rgba(0, 0, 0, 0.2)">
+    © 2023 Copyright:
+    <a
+      class="text-white"
+      target="_blank"
+      href="https://www.phoenixgrafica.com.ar/"
+      >Artes Graficas Phoenix</a
+    >
+  </div>
+  <!-- Copyright -->
+</footer>

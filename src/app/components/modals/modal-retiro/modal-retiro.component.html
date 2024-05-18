@@ -1,0 +1,70 @@
+<div class="modal-content p-3">
+  <form [formGroup]="form">
+    <h4>Retiro de dinero</h4>
+    <div class="m-3">
+      <mdb-form-control>
+        <input
+          mdbInput
+          type="date"
+          id="fecha"
+          class="form-control"
+          formControlName="fecha"
+        />
+        <label mdbLabel class="form-label" for="fecha">Fecha</label>
+      </mdb-form-control>
+    </div>
+    <div class="m-3">
+      <mdb-form-control>
+        <textarea
+          mdbInput
+          id="detalle"
+          class="form-control"
+          formControlName="detalle"
+        ></textarea>
+
+        <label mdbLabel class="form-label" for="detalle">Detalle</label>
+      </mdb-form-control>
+      <div *ngIf="form.controls['detalle'].errors != null">
+        <small
+          class="invalid"
+          *ngIf="
+            form.controls['detalle'].errors!['required'] &&
+            form.controls['detalle'].touched
+          "
+          >Debe ingresar un detalle.</small
+        >
+      </div>
+    </div>
+    <div class="m-3">
+      <mdb-form-control>
+        <input
+          mdbInput
+          type="number"
+          id="monto"
+          class="form-control"
+          formControlName="monto"
+        />
+        <label mdbLabel class="form-label" for="monto">Monto</label>
+      </mdb-form-control>
+      <div *ngIf="form.controls['monto'].errors != null">
+        <small
+          class="invalid"
+          *ngIf="
+            form.controls['monto'].errors!['required'] &&
+            form.controls['monto'].touched
+          "
+          >Debe ingresar un monto.</small
+        >
+      </div>
+    </div>
+
+    <div class="text-center pt-1 mb-1 pb-1">
+      <button type="button" class="btn btn-success" (click)="retirarDinero()">
+        Confirmar Retiro
+      </button>
+      <button type="button" class="btn btn-danger" (click)="cancelar()">
+        Cancelar
+      </button>
+    </div>
+  </form>
+</div>

@@ -1,0 +1,110 @@
+<div class="container py-5 h-100">
+  <div class="row d-flex justify-content-center align-items-center h-100">
+    <div class="card rounded-6 text-black">
+      <div class="card-body p-md-5 mx-md-4">
+        <h4 class="text-center mb-1 pb-1">Presupuestos</h4>
+        <form (ngSubmit)="onSubmit()" [formGroup]="form">
+          <div class="m-3">
+            <mdb-form-control>
+              <input
+                mdbInput
+                type="text"
+                id="cliente"
+                class="form-control"
+                formControlName="cliente"
+              />
+              <label mdbLabel class="form-label" for="cliente">Cliente</label>
+            </mdb-form-control>
+            <div *ngIf="form.controls['cliente'].errors != null">
+              <small
+                class="invalid"
+                *ngIf="
+                  form.controls['cliente'].errors!['required'] &&
+                  form.controls['cliente'].touched
+                "
+                >Debe ingresar el nombre del cliente.</small
+              >
+            </div>
+          </div>
+
+          <div class="m-3">
+            <mdb-form-control>
+              <input
+                mdbInput
+                type="date"
+                id="fecha"
+                class="form-control"
+                formControlName="fecha"
+              />
+              <label mdbLabel class="form-label" for="fecha">Fecha</label>
+            </mdb-form-control>
+            <div *ngIf="form.controls['fecha'].errors != null">
+              <small
+                class="invalid"
+                *ngIf="
+                  form.controls['fecha'].errors!['required'] &&
+                  form.controls['fecha'].touched
+                "
+                >Debe seleccionar una fecha.</small
+              >
+            </div>
+          </div>
+
+          <div class="m-3">
+            <mdb-form-control>
+              <textarea
+                mdbInput
+                id="detalle"
+                class="form-control"
+                formControlName="detalle"
+              ></textarea>
+              <label mdbLabel class="form-label" for="detalle">Detalle</label>
+            </mdb-form-control>
+            <div *ngIf="form.controls['detalle'].errors != null">
+              <small
+                class="invalid"
+                *ngIf="
+                  form.controls['detalle'].errors!['required'] &&
+                  form.controls['detalle'].touched
+                "
+                >Debe ingresar un detalle.</small
+              >
+            </div>
+          </div>
+
+          <div class="m-3">
+            <mdb-form-control>
+              <input
+                mdbInput
+                type="number"
+                id="precio"
+                class="form-control"
+                formControlName="precio"
+              />
+              <label mdbLabel class="form-label" for="precio">Precio</label>
+            </mdb-form-control>
+            <div *ngIf="form.controls['precio'].errors != null">
+              <small
+                class="invalid"
+                *ngIf="
+                  form.controls['precio'].errors!['required'] &&
+                  form.controls['precio'].touched
+                "
+                >Debe ingresar un precio.</small
+              >
+            </div>
+          </div>
+
+          <div class="text-center pt-1 mb-1 pb-1">
+            <button
+              class="btn btn-primary btn-block fa-lg gradient-custom-2 mb-3"
+              type="submit"
+            >
+              Generar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

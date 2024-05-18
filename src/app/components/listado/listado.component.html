@@ -1,0 +1,236 @@
+<div class="container py-5">
+  <div class="input-group mb-3">
+    <input
+      [(ngModel)]="searchTerm"
+      (keyup)="search()"
+      placeholder="Buscar"
+      class="form-control"
+    />
+    <span class="input-group-text" id="basic-addon2">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="16"
+        height="16"
+        fill="currentColor"
+        class="bi bi-search"
+        viewBox="0 0 16 16"
+      >
+        <path
+          d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"
+        />
+      </svg>
+    </span>
+  </div>
+  <div class="input-group mb-3">
+    <select
+      [(ngModel)]="orderType"
+      class="form-select"
+      (change)="sortLaburos()"
+    >
+      <option [value]="OrderType.Cliente" selected>Orden predeterminado</option>
+      <option [value]="OrderType.Fecha">
+        Fecha del mas nuevo al mas viejo
+      </option>
+      <option [value]="OrderType.FechaVieja">
+        Fecha del mas viejo al mas nuevo
+      </option>
+      <option [value]="OrderType.FechaEntrega">
+        Fecha de Entrega del mas nuevo al mas viejo
+      </option>
+      <option [value]="OrderType.FechaEntregaVieja">
+        Fecha de Entrega del mas viejo al mas nuevo
+      </option>
+      <option [value]="OrderType.Caja">Caja</option>
+      <option [value]="OrderType.Precio">Menor Precio a Mayor Precio</option>
+      <option [value]="OrderType.PrecioMayor">
+        Mayor Precio a Menor Precio
+      </option>
+      <option [value]="OrderType.Trabajo">Trabajo</option>
+    </select>
+  </div>
+
+  <div class="container py-5">
+    <div *ngIf="loading" class="text-center">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Cargando...</span>
+      </div>
+    </div>
+    <div *ngIf="!loading" class="row row-cols-1 row-cols-md-2 g-4">
+      <div *ngFor="let laburo of filteredLaburos" class="col">
+        <div class="card h-100">
+          <div
+            class="card-body d-grid"
+            [ngClass]="{ pagado: laburo.data.pago || laburo.data.pagoEfectivo }"
+          >
+            <h5 class="card-title">
+              <span *ngIf="laburo.data.numero">N°{{ laburo.data.numero }}</span>
+              <span *ngIf="!laburo.data.numero">N° -- </span>
+              <br />
+              {{
+                laburo.data.cliente &&
+                  laburo.data.cliente.charAt(0).toUpperCase() +
+                    laburo.data.cliente.slice(1).toLowerCase()
+              }}
+            </h5>
+
+            <div class="card-text">
+              <div class="card-text">
+                <p class="mb-2">
+                  Fecha: {{ laburo.data.fecha | date : "dd/MM/yyyy" }}
+                </p>
+                <p class="mb-2">
+                  Fecha de Entrega:
+                  {{ laburo.data.fechaEntrega | date : "dd/MM/yyyy" }}
+                </p>
+
+                <p class="mb-2">Trabajo: {{ laburo.data.trabajo }}</p>
+
+                <p class="mb-2" style="max-height: 100px; overflow-y: auto">
+                  Detalle: {{ laburo.data.detalle }}
+                </p>
+
+                <p class="mb-2">
+                  <strong>Total: {{ laburo.data.precio | currency }}</strong>
+                </p>
+
+                <p class="mb-2">Seña: {{ laburo.data.sena | currency }}</p>
+
+                <span *ngIf="laburo.data.sena > 0">
+                  <span
+                    *ngIf="laburo.data.cajaSena === 'transferencia'"
+                    class="transferencia-color"
+                  >
+                    <p class="mb-2">Caja Seña: {{ laburo.data.cajaSena }}</p>
+                  </span>
+
+                  <span
+                    *ngIf="laburo.data.cajaSena === 'efectivo'"
+                    class="efectivo-color"
+                  >
+                    <p class="mb-2">Caja Seña: {{ laburo.data.cajaSena }}</p>
+                  </span>
+                </span>
+
+                <span *ngIf="laburo.data.cajaSena === 'transferencia'">
+                  <p class="mb-2">
+                    Cuenta Seña: {{ laburo.data.cuentaNombreSena }}
+                  </p>
+                </span>
+
+                <span *ngIf="laburo.data.pagoEfectivo">
+                  <p class="mb-2">
+                    Pago Final efectivo
+                    {{ laburo.data.pagoEfectivo | currency }}
+                  </p>
+                </span>
+                <span
+                  *ngIf="
+                    laburo.data.cajaFinalEfectivo === 'efectivo' &&
+                    laburo.data.pagoEfectivo
+                  "
+                  class="efectivo-color"
+                >
+                  <p class="mb-2">
+                    Caja Final :
+                    {{ laburo.data.cajaFinalEfectivo }}
+                  </p>
+                </span>
+
+                <span *ngIf="laburo.data.pago">
+                  <p class="mb-2">
+                    Pago Final Transferencia {{ laburo.data.pago | currency }}
+                  </p>
+                </span>
+                <span
+                  *ngIf="
+                    laburo.data.cajaFinal === 'transferencia' &&
+                    laburo.data.pago
+                  "
+                  class="transferencia-color"
+                >
+                  <p class="mb-2">Caja Final: {{ laburo.data.cajaFinal }}</p>
+                </span>
+
+                <span
+                  *ngIf="
+                    laburo.data.cajaFinal === 'transferencia' &&
+                    laburo.data.pago
+                  "
+                >
+                  <p class="mb-2">
+                    Cuenta Final: {{ laburo.data.cuentaNombreFinal }}
+                  </p>
+                </span>
+                <span *ngIf="laburo.data.comentario !== ''">
+                  <p class="mb-2">Comentario: {{ laburo.data.comentario }}</p>
+                </span>
+              </div>
+              <div class="mt-auto">
+                <button
+                  *ngIf="esAdmin"
+                  type="button"
+                  class="btn btn-primary me-2"
+                  (click)="modificar(laburo)"
+                >
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button
+                  *ngIf="esAdmin"
+                  type="button"
+                  class="btn btn-danger me-2"
+                  (click)="borrar(laburo)"
+                >
+                  <i class="fas fa-trash"></i>
+                </button>
+                
+                <button
+                  *ngIf="!laburo.data.pago && !laburo.data.pagoEfectivo"
+                  type="button"
+                  class="btn btn-success me-2"
+                  (click)="agregarPago(laburo)"
+                >
+                  <i class="fa-solid fa-plus"> </i>Pago
+                </button>
+
+                <button
+                  *ngIf="!laburo.data.comentario"
+                  type="button"
+                  class="btn btn-secondary me-2"
+                  (click)="agregarComentario(laburo)"
+                >
+                  <i class="fa-solid fa-plus"> </i>Comentario
+                </button>
+
+                <button
+                  *ngIf="laburo.data.comprobantePago"
+                  type="button"
+                  class="btn btn-secondary me-2"
+                  (click)="mostrarComprobante(laburo, 2)"
+                >
+                  <i class="fa-solid fa-eye"></i> Pago
+                </button>
+
+                <button
+                  *ngIf="laburo.data.comprobanteSena"
+                  type="button"
+                  class="btn btn-secondary me-2"
+                  (click)="mostrarComprobante(laburo, 1)"
+                >
+                  <i class="fa-solid fa-eye"></i> Seña
+                </button>
+
+                <button
+                  type="button"
+                  class="btn btn-warning me-2"
+                  (click)="createPDF(laburo)"
+                >
+                  <i class="fa-solid fa-print"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
