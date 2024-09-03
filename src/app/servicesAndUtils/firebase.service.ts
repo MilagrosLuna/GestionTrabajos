@@ -13,6 +13,9 @@ import {
   setDoc,
   updateDoc,
   where,
+  orderBy,
+  limit,
+  startAfter,
 } from 'firebase/firestore';
 
 import { environment } from 'src/environments/environment';
@@ -54,6 +57,28 @@ export class FirebaseService {
       array.push(data);
     });
     return array;
+  }
+
+  async obtenerConPaginacion(ruta: string, ordenCampo: string, limite: number, ultimoDoc: any = null) {
+    let array: any[] = [];
+    let q;
+    const colRef = collection(this.db, ruta);
+
+    if (ultimoDoc) {
+      q = query(colRef, orderBy(ordenCampo, 'desc'), startAfter(ultimoDoc), limit(limite));
+    } else {
+      q = query(colRef, orderBy(ordenCampo, 'desc'), limit(limite));
+    }
+
+    const querySnapshot = await getDocs(q);
+    querySnapshot.forEach((doc) => {
+      let data = {
+        id: doc.id,
+        data: doc.data(),
+      };
+      array.push(data);
+    });
+    return { data: array, ultimoDoc: querySnapshot.docs[querySnapshot.docs.length - 1] };
   }
 
   async getWhere(path: string, condicion: string, condicion2: string) {

@@ -25,6 +25,11 @@ export class ListadoComponent {
   esAdmin: boolean = false;
   loading: boolean = false;
   admins: any[] = [];
+
+  ultimoDoc: any = null;
+  laburosPorPagina: number = 25;
+
+
   cuentasMap: { [id: string]: string } = {};
   OrderType = {
     Fecha: 'fecha',
@@ -76,10 +81,21 @@ export class ListadoComponent {
   }
 
   private async loadLaburos(): Promise<void> {
-    this.laburos = await this.firebase.obtener('laburos');
-    this.filteredLaburos = this.laburos.map((laburo) =>
-      this.transformLaburo(laburo)
-    );
+    // this.laburos = await this.firebase.obtener('laburos');
+    // this.filteredLaburos = this.laburos.map((laburo) =>
+    //   this.transformLaburo(laburo)
+    // );
+
+    const result = await this.firebase.obtenerConPaginacion('laburos', 'fecha', this.laburosPorPagina, this.ultimoDoc);
+    this.laburos = [...this.laburos, ...result.data];
+    this.filteredLaburos = this.laburos.map((laburo) => this.transformLaburo(laburo));
+    this.ultimoDoc = result.ultimoDoc;
+    this.sortLaburos();
+
+  }
+
+  async loadMoreLaburos() {
+    await this.loadLaburos();
   }
 
   private transformLaburo(laburo: any): any {
@@ -124,22 +140,6 @@ export class ListadoComponent {
   }
 
   search() {
-    // if (this.searchTerm) {
-    //   this.filteredLaburos = this.laburos.filter((laburo) =>
-    //     Object.values(laburo.data).some(
-    //       (value) =>
-    //         value &&
-    //         value
-    //           .toString()
-    //           .toLowerCase()
-    //           .includes(this.searchTerm.toLowerCase())
-    //     )
-    //   );
-
-    // } else {
-    //   this.filteredLaburos = this.laburos;
-    // }
-
     if (this.searchTerm) {
       this.filteredLaburos = this.filteredLaburos.filter((laburo) =>
         Object.values(laburo.data).some(

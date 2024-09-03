@@ -14,3 +14,17 @@
   background-color: rgba(150, 248, 248, 0.653);
   border-radius: calc(0.5rem - 1px);
 }
+
+// .messi{
+//   display: flex;
+//   position: relative;
+//   top: auto;
+//   left: 0;
+// }
+
+.fixed-bottom-left {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  z-index: 1000; 
+}
