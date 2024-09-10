@@ -4,26 +4,111 @@
       <div class="card-body p-md-5 mx-md-4">
         <h4 class="text-center mb-1 pb-1">Cargar Trabajo</h4>
         <form (ngSubmit)="onSubmit()" [formGroup]="form">
+          <!-- Client Search -->
+          <div class="m-3">
+            <input
+              mdbCheckbox
+              formControlName="esClienteAnonimo"
+              class="form-check-input"
+              type="checkbox"
+              id="flexCheckDefault"
+            />
+            <label class="form-check-label" for="flexCheckDefault">
+              Cliente Anónimo
+            </label>
+          </div>
+
           <div class="m-3">
             <mdb-form-control>
               <input
                 mdbInput
                 type="text"
-                id="cliente"
+                id="clienteName"
                 class="form-control"
-                formControlName="cliente"
+                formControlName="clienteName"
+                placeholder="Nombre del cliente"
               />
-              <label mdbLabel class="form-label" for="cliente">Cliente</label>
+              <label mdbLabel class="form-label" for="clienteName"
+                >Nombre</label
+              >
             </mdb-form-control>
-            <div *ngIf="form.controls['cliente'].errors != null">
+
+            <div *ngIf="form.controls['clienteName'].errors != null">
               <small
                 class="invalid"
                 *ngIf="
-                  form.controls['cliente'].errors!['required'] &&
-                  form.controls['cliente'].touched
+                  form.controls['clienteName'].errors!['required'] &&
+                  form.controls['clienteName'].touched
                 "
                 >Debe ingresar el nombre del cliente.</small
               >
+            </div>
+          </div>
+          <div *ngIf="!form.controls['esClienteAnonimo'].value">
+            <div class="m-3">
+              <mdb-form-control>
+                <input
+                  mdbInput
+                  type="text"
+                  id="clienteSurname"
+                  class="form-control"
+                  formControlName="clienteSurname"
+                  placeholder="Apellido del cliente"
+                />
+                <label mdbLabel class="form-label" for="clienteSurname"
+                  >Apellido</label
+                >
+              </mdb-form-control>
+              <div *ngIf="form.controls['clienteSurname'].errors != null">
+                <small
+                  class="invalid"
+                  *ngIf="
+                    form.controls['clienteSurname'].errors!['required'] &&
+                    form.controls['clienteSurname'].touched
+                  "
+                  >Debe ingresar el apellido del cliente.</small
+                >
+              </div>
+            </div>
+            <div class="m-3">
+              <button
+                type="button"
+                class="btn btn-info"
+                (click)="buscarCliente()"
+              >
+                Buscar Cliente
+              </button>
+            </div>
+
+            <div
+              *ngIf="clientesFiltered.length > 0"
+              class="dropdown-menu show w-90 m-3"
+            >
+              <button
+                class="dropdown-item"
+                *ngFor="let cliente of clientesFiltered"
+                (click)="selectCliente(cliente)"
+              >
+                {{ cliente.data.nombre }} {{ cliente.data.apellido }} -
+                {{ cliente.data.telefono }} - {{ cliente.data.email }}
+              </button>
+            </div>
+
+            <div class="m-3">
+              <mdb-form-control>
+                <input
+                  mdbInput
+                  type="text"
+                  id="clienteInfo"
+                  class="form-control"
+                  [value]="selectedClienteInfo"
+                  placeholder="Cliente seleccionado"
+                  [readonly]="true"
+                />
+                <label readonly mdbLabel class="form-label" for="clienteInfo">
+                  Cliente seleccionado
+                </label>
+              </mdb-form-control>
             </div>
           </div>
 

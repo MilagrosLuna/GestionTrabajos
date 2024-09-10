@@ -1,6 +1,6 @@
 <nav class="navbar fixed-top navbar-expand-lg navbar-light bg-light">
   <div class="container">
-    <a class="navbar-brand me-2" href="/home">
+    <a class="navbar-brand me-2" href="/home/alta">
       <img
         src="../../../assets/logo.png"
         height="16"
@@ -24,7 +24,6 @@
       mdbCollapse
       #buttonsNav="mdbCollapse"
     >
-      <!-- Left links -->
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
         <li class="nav-item">
           <div *ngIf="logueado">
@@ -35,7 +34,7 @@
           </div>
         </li>
       </ul>
-      <!-- Left links -->
+
       <div class="d-flex align-items-center">
         <div *ngIf="logueado">
           <button
@@ -47,14 +46,6 @@
             caja
           </button>
           <button
-           
-            type="button"
-            class="btn btn-link px-3 me-2"
-            (click)="goTo('home/presupuestos')"
-          >
-            presupuestos
-          </button>
-          <button
             *ngIf="esAdmin"
             type="button"
             class="btn btn-link px-3 me-2"
@@ -63,12 +54,35 @@
             Ver graficos
           </button>
           <button
+            type="button"
+            class="btn btn-link text-success px-3 me-2"
+            (click)="goTo('home/presupuestos')"
+          >
+            presupuestos
+          </button>
+
+          <button
             *ngIf="esAdmin"
             type="button"
-            class="btn btn-link px-3 me-2"
+            class="btn btn-link text-success px-3 me-2"
             (click)="goTo('home/cuentas')"
           >
             Alta Cuentas
+          </button>
+
+          <button
+            type="button"
+            class="btn btn-link text-danger px-3 me-2"
+            (click)="goTo('home/listadoC')"
+          >
+            Ver clientes
+          </button>
+          <button
+            type="button"
+            class="btn btn-link text-danger px-3 me-2"
+            (click)="goTo('home/altaC')"
+          >
+            Cargar cliente
           </button>
           <button
             type="button"
@@ -84,6 +98,7 @@
           >
             Cargar trabajos
           </button>
+
           <button type="button" class="btn btn-danger me-3" (click)="logOut()">
             cerrar sesion
           </button>
@@ -106,8 +121,5 @@
         </div>
       </div>
     </div>
-    <!-- Collapsible wrapper -->
   </div>
-  <!-- Container wrapper -->
 </nav>
-<!-- Navbar -->

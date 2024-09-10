@@ -67,8 +67,10 @@ export class PresupuestosComponent {
 
       let presupuestoObj = JSON.parse(JSON.stringify(presupuesto));
       await this.firebase.guardar(presupuestoObj, 'presupuestos');
-      console.log(presupuesto);
+      // console.log(presupuesto);
       await this.createPDF(presupuesto);
+      this.form.reset({
+        fecha: this.getCurrentDate(),});
     } else {
       this.alerts.showErrorMessage('Debe completar todos los datos');
     }

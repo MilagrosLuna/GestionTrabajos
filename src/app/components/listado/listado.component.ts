@@ -25,11 +25,9 @@ export class ListadoComponent {
   esAdmin: boolean = false;
   loading: boolean = false;
   admins: any[] = [];
-
   ultimoDoc: any = null;
   laburosPorPagina: number = 25;
-
-
+  clientesMap: { [id: string]: any } = {};
   cuentasMap: { [id: string]: string } = {};
   OrderType = {
     Fecha: 'fecha',
@@ -57,17 +55,20 @@ export class ListadoComponent {
     await this.initializeData();
     await this.subscribeToConfirmationEvents();
     this.sortLaburos();
-    // console.log(this.filteredLaburos);
     this.loading = false;
   }
 
   private async initializeData(): Promise<void> {
     await this.loadCuentas();
+    await this.loadClientes();
     await this.loadLaburos();
   }
 
   private async reloasdData(): Promise<void> {
     this.loading = true;
+    this.laburos = [];
+    this.filteredLaburos = [];
+    this.ultimoDoc = null;
     await this.loadLaburos();
     this.sortLaburos();
     this.loading = false;
@@ -80,18 +81,34 @@ export class ListadoComponent {
     });
   }
 
-  private async loadLaburos(): Promise<void> {
-    // this.laburos = await this.firebase.obtener('laburos');
-    // this.filteredLaburos = this.laburos.map((laburo) =>
-    //   this.transformLaburo(laburo)
-    // );
+  private async loadClientes(): Promise<void> {
+    const clientes = await this.firebase.obtener('clientes');
+    clientes.forEach((cliente: any) => {
+      this.clientesMap[cliente.id] = cliente.data;
+    });
+  }
 
-    const result = await this.firebase.obtenerConPaginacion('laburos', 'fecha', this.laburosPorPagina, this.ultimoDoc);
-    this.laburos = [...this.laburos, ...result.data];
-    this.filteredLaburos = this.laburos.map((laburo) => this.transformLaburo(laburo));
+  private async loadLaburos(): Promise<void> {
+    const result = await this.firebase.obtenerConPaginacion(
+      'laburos',
+      'fecha',
+      this.laburosPorPagina,
+      this.ultimoDoc
+    );
+
+    const newLaburos = result.data.filter((laburo: any) => {
+      return !this.laburos.some(
+        (existingLaburo) => existingLaburo.id === laburo.id
+      );
+    });
+
+    this.laburos = [...this.laburos, ...newLaburos];
+
+    this.filteredLaburos = this.laburos.map((laburo) =>
+      this.transformLaburo(laburo)
+    );
     this.ultimoDoc = result.ultimoDoc;
     this.sortLaburos();
-
   }
 
   async loadMoreLaburos() {
@@ -99,12 +116,14 @@ export class ListadoComponent {
   }
 
   private transformLaburo(laburo: any): any {
+    const clienteData = this.clientesMap[laburo.data.clienteid] || {};
     return {
       ...laburo,
       data: {
         ...laburo.data,
         cuentaNombreSena: this.getCuentaNameById(laburo.data.cuentaSena),
         cuentaNombreFinal: this.getCuentaNameById(laburo.data.cuentaFinal),
+        clienteInfo: clienteData,
       },
     };
   }
@@ -242,7 +261,7 @@ export class ListadoComponent {
     if (!laburoCopy.data.numero) {
       laburoCopy.data.numero = 0;
     }
-    if (!laburoCopy.data.comentario || laburoCopy.data.comentario==='') {
+    if (!laburoCopy.data.comentario || laburoCopy.data.comentario === '') {
       laburoCopy.data.comentario = '---';
     }
     let pdfDefinition: any = {

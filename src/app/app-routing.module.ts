@@ -12,6 +12,9 @@ import { GraficosComponent } from './components/graficos/graficos.component';
 import { CuentasComponent } from './components/cuentas/cuentas.component';
 import { CajaComponent } from './components/caja/caja.component';
 import { PresupuestosComponent } from './components/presupuestos/presupuestos.component';
+import { AltaClienteComponent } from './components/altaCliente/altaCliente.component';
+import { ListadoClientesComponent } from './components/listado-clientes/listado-clientes.component';
+import { FiltroLaburosClientesComponent } from './components/filtro-laburos-clientes/filtro-laburos-clientes.component';
 
 const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -23,7 +26,10 @@ const routes: Routes = [
     canActivate: [AuthGuard],
     children: [
       { path: 'alta', component: AltaComponent },
+      { path: 'altaC', component: AltaClienteComponent },
       { path: 'listado', component: ListadoComponent },
+      { path: 'listadoC', component: ListadoClientesComponent },
+      { path: 'filtro/:id', component: FiltroLaburosClientesComponent },
       { path: 'graficos', component: GraficosComponent },
       { path: 'cuentas', component: CuentasComponent },
       { path: 'caja', component: CajaComponent },

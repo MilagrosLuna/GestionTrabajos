@@ -5,6 +5,8 @@ import { AlertsService } from 'src/app/servicesAndUtils/alerts.service';
 import { Laburo } from 'src/app/clases/laburo';
 import { StorageService } from 'src/app/servicesAndUtils/storage.service';
 import { Movimiento } from 'src/app/clases/movimiento';
+import { map, Observable, startWith } from 'rxjs';
+
 @Component({
   selector: 'app-alta',
   templateUrl: './alta.component.html',
@@ -13,8 +15,14 @@ import { Movimiento } from 'src/app/clases/movimiento';
 export class AltaComponent {
   form!: FormGroup;
   cuentas: any[] = [];
+  clientes: any[] = [];
+  filteredClientes: Observable<any[]> = new Observable<any[]>();
   mostrarCampoNuevaCuenta: boolean = false;
   url!: File;
+  showDropdown: boolean = false;
+  clientesFiltered: any[] = [];
+  selectedClienteInfo: string = '';
+
   constructor(
     private firebase: FirebaseService,
     private alerts: AlertsService,
@@ -23,6 +31,9 @@ export class AltaComponent {
 
   async ngOnInit(): Promise<void> {
     this.form = new FormGroup({
+      clienteName: new FormControl('', [Validators.required]),
+      esClienteAnonimo: new FormControl(false),
+      clienteSurname: new FormControl(''),
       cliente: new FormControl('', [Validators.required]),
       fecha: new FormControl(this.getCurrentDate(), [Validators.required]),
       fechaEntrega: new FormControl(this.getFutureDate(), [
@@ -40,15 +51,51 @@ export class AltaComponent {
         Validators.pattern(/^\d+(\.\d{1,2})?$/),
         Validators.min(0),
       ]),
-
       caja: new FormControl('', [Validators.required]),
-      cuenta: new FormControl('', [Validators.required]),
-      comprobante: new FormControl('', [Validators.required]),
+      cuenta: new FormControl(''),
+      comprobante: new FormControl(''),
       nuevaCuenta: new FormControl(''),
+    });
+
+    // Deshabilitar la validación del campo cliente si es cliente anónimo
+    this.form.controls['esClienteAnonimo'].valueChanges.subscribe((value) => {
+      if (value) {
+        this.form.controls['cliente'].clearValidators();
+        this.form.controls['cliente'].setValue(''); // Limpiar cliente seleccionado
+        this.form.controls['cliente'].updateValueAndValidity();
+      } else {
+        this.form.controls['cliente'].setValidators([Validators.required]);
+        this.form.controls['cliente'].updateValueAndValidity();
+      }
     });
 
     this.cuentas = await this.firebase.obtener('cuentas');
   }
+
+  async buscarCliente() {
+    const nombre = this.form.controls['clienteName'].value.trim();
+    const apellido = this.form.controls['clienteSurname'].value.trim();
+
+    if (nombre && apellido) {
+      this.clientesFiltered = await this.firebase.getWhere(
+        'clientes',
+        'nombre',
+        nombre
+      );
+      this.clientesFiltered = this.clientesFiltered.filter((cliente) =>
+        cliente.data.apellido.toLowerCase().includes(apellido.toLowerCase())
+      );
+    } else {
+      this.alerts.showErrorMessage('Complete nombre y apellido para buscar.');
+    }
+  }
+
+  selectCliente(cliente: any) {
+    this.form.controls['cliente'].setValue(cliente.id);
+    this.selectedClienteInfo = `N° ${cliente.data.clienteNumero} - ${cliente.data.nombre} ${cliente.data.apellido} - ${cliente.data.telefono} - ${cliente.data.email}`;
+    this.clientesFiltered = [];
+  }
+
   getCurrentDate(): string {
     const today = new Date();
     const month = (today.getMonth() + 1).toString().padStart(2, '0');
@@ -63,7 +110,6 @@ export class AltaComponent {
     const day = future.getDate().toString().padStart(2, '0');
     return `${future.getFullYear()}-${month}-${day}`;
   }
-
   async agregarCuenta() {
     const nuevaCuenta = this.form.controls['nuevaCuenta'].value.trim();
     if (nuevaCuenta !== '') {
@@ -77,29 +123,20 @@ export class AltaComponent {
         this.alerts.showErrorMessage('La cuenta ya existe');
       }
     } else {
-      this.alerts.showErrorMessage('complete los datos');
+      this.alerts.showErrorMessage('Complete los datos');
     }
   }
 
   async onSubmit() {
-    if (this.form.value.caja == 'efectivo') {
-      if (
-        this.form.controls['cliente'].valid &&
-        this.form.controls['fecha'].valid &&
-        this.form.controls['fechaEntrega'].valid &&
-        this.form.controls['trabajo'].valid &&
-        this.form.controls['detalle'].valid &&
-        this.form.controls['precio'].valid &&
-        this.form.controls['seña'].valid &&
-        this.form.controls['caja'].valid
-      ) {
+    if (this.form.value.caja === 'efectivo') {
+      if (this.form.valid) {
         try {
           await this.cargar();
         } catch (error: any) {
           this.alerts.showErrorMessage(error);
         }
       } else {
-        this.alerts.showErrorMessage('Error complete todos los datos!');
+        this.alerts.showErrorMessage('Complete todos los datos');
       }
     } else if (this.form.valid) {
       try {
@@ -108,7 +145,7 @@ export class AltaComponent {
         this.alerts.showErrorMessage(error);
       }
     } else {
-      this.alerts.showErrorMessage('Error complete todos los datos!');
+      this.alerts.showErrorMessage('Complete todos los datos');
     }
   }
   async cargar() {
@@ -120,7 +157,13 @@ export class AltaComponent {
       );
       laburo.comprobanteSena = fotoUrl;
     }
-    laburo.cliente = this.form.value.cliente;
+
+    if (this.form.value.esClienteAnonimo ==true) {
+      laburo.cliente = this.form.value.clienteName;
+    } else if (this.form.value.esClienteAnonimo ==false){
+      laburo.clienteid = this.form.value.cliente;
+    }
+
     laburo.fecha = this.form.value.fecha;
     laburo.fechaEntrega = this.form.value.fechaEntrega;
     laburo.trabajo = this.form.value.trabajo;
@@ -129,13 +172,11 @@ export class AltaComponent {
     laburo.sena = this.form.value.seña;
     laburo.cajaSena = this.form.value.caja;
     laburo.cuentaSena = this.form.value.cuenta;
-    if (laburo.sena == laburo.precio) {
-      console.log('laburo=seña');
-      if (laburo.cajaSena == 'efectivo') {
-     
+
+    if (laburo.sena === laburo.precio) {
+      if (laburo.cajaSena === 'efectivo') {
         laburo.pagoEfectivo = laburo.precio;
-        laburo.cajaFinalEfectivo = laburo.cajaSena;  
-         console.log('efectivo');
+        laburo.cajaFinalEfectivo = laburo.cajaSena;
       } else {
         laburo.pago = laburo.precio;
         laburo.comprobantePago = laburo.comprobanteSena;
@@ -161,12 +202,12 @@ export class AltaComponent {
     laburo.numero = contador;
 
     let laburoObj = JSON.parse(JSON.stringify(laburo));
-
+  
     let id = await this.firebase.guardar(laburoObj, 'laburos');
 
     let movimiento = new Movimiento();
     movimiento.detalle =
-      laburo.cliente +
+      this.selectedClienteInfo +
       ', trabajo: ' +
       laburo.trabajo +
       ', detalle: ' +
@@ -177,9 +218,9 @@ export class AltaComponent {
     movimiento.idLaburo = id.id;
     movimiento.tipo = 'credito';
     let monto = 0;
-    if (laburo.cajaSena == 'efectivo') {
+    if (laburo.cajaSena === 'efectivo') {
       monto += laburo.sena;
-    } else if (laburo.cajaFinalEfectivo == 'efectivo') {
+    } else if (laburo.cajaFinalEfectivo === 'efectivo') {
       monto += laburo.pagoEfectivo;
     }
 
@@ -189,11 +230,11 @@ export class AltaComponent {
       let movimientoObj = JSON.parse(JSON.stringify(movimiento));
       await this.firebase.guardar(movimientoObj, 'movimientos');
     }
-
     this.form.reset({
       fecha: this.getCurrentDate(),
       fechaEntrega: this.getFutureDate(),
     });
+    this.selectedClienteInfo = '';
     this.alerts.showSuccessMessage('', 'Trabajo cargado');
   }
 

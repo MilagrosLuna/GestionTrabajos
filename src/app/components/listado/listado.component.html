@@ -66,15 +66,52 @@
               <span *ngIf="laburo.data.numero">N°{{ laburo.data.numero }}</span>
               <span *ngIf="!laburo.data.numero">N° -- </span>
               <br />
-              {{
-                laburo.data.cliente &&
-                  laburo.data.cliente.charAt(0).toUpperCase() +
-                    laburo.data.cliente.slice(1).toLowerCase()
-              }}
+
+              <div *ngIf="!laburo.data.clienteid">
+                {{
+                  laburo.data.cliente &&
+                    laburo.data.cliente.charAt(0).toUpperCase() +
+                      laburo.data.cliente.slice(1).toLowerCase()
+                }}
+              </div>
+
+              <div *ngIf="laburo.data.clienteid">
+                <p class="mb-2">
+                  {{
+                    laburo.data.clienteInfo.nombre &&
+                      laburo.data.clienteInfo.nombre.charAt(0).toUpperCase() +
+                        laburo.data.clienteInfo.nombre.slice(1).toLowerCase()
+                  }}
+                  {{
+                    laburo.data.clienteInfo.apellido &&
+                      laburo.data.clienteInfo.apellido
+                        .charAt(0)
+                        .toUpperCase() +
+                        laburo.data.clienteInfo.apellido
+                          .slice(1)
+                          .toLowerCase()
+                  }}
+                </p>
+              </div>
             </h5>
 
             <div class="card-text">
               <div class="card-text">
+                <div *ngIf="laburo.data.clienteid" class=""><em>
+                  <p class="mb-1">
+                    Cliente N°{{ laburo.data.clienteInfo.clienteNumero }}
+                  </p>
+                  <p class="mb-1">Email: {{ laburo.data.clienteInfo.email }}</p>
+                  <p class="mb-1">
+                    Teléfono: {{ laburo.data.clienteInfo.telefono }}
+                  </p>
+                  <p class="mb-3" [ngClass]="{'text-success': laburo.data.clienteInfo.gremio, 'text-muted': !laburo.data.clienteInfo.gremio}">
+                    Gremio: {{ laburo.data.clienteInfo.gremio ? 'Pertenece' : 'No Pertenece' }}
+                  </p>
+                  
+                </em>
+                </div>
+
                 <p class="mb-2">
                   Fecha: {{ laburo.data.fecha | date : "dd/MM/yyyy" }}
                 </p>
@@ -182,7 +219,7 @@
                 >
                   <i class="fas fa-trash"></i>
                 </button>
-                
+
                 <button
                   *ngIf="!laburo.data.pago && !laburo.data.pagoEfectivo"
                   type="button"
@@ -231,14 +268,16 @@
           </div>
         </div>
       </div>
-      <div class="messi" 
-      >
-      <button (click)="loadMoreLaburos()" [disabled]="loading" class="btn btn-primary btn-floating fixed-bottom-left" mdbRipple> 
-        +
-      </button>
-      
+      <div class="messi">
+        <button
+          (click)="loadMoreLaburos()"
+          [disabled]="loading"
+          class="btn btn-primary btn-floating fixed-bottom-left"
+          mdbRipple
+        >
+          +
+        </button>
       </div>
-      
     </div>
   </div>
 </div>

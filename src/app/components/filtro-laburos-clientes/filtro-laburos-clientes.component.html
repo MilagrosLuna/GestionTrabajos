@@ -1,0 +1,189 @@
+<div class="container py-5">
+  <div *ngIf="loading" class="text-center">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+  </div>
+
+  <div *ngIf="cliente" class="mb-4 p-4 border bg-white rounded shadow-sm fs-4">
+    <h3 class="mb-3 fw-bold">Información del Cliente</h3>
+    <div class="row">
+      <div class="col-md-6">
+        <p><strong>Cliente N°:</strong> {{ cliente.data.clienteNumero }}</p>
+        <p>
+          <strong>Nombre:</strong> {{ cliente.data.nombre }}
+          {{ cliente.data.apellido }}
+        </p>
+      </div>
+      <div class="col-md-6">
+        <p><strong>Email:</strong> {{ cliente.data.email }}</p>
+        <p><strong>Teléfono:</strong> {{ cliente.data.telefono }}</p>
+      </div>
+    </div>
+    <div class="mt-3">
+      <p><strong>Gremio:</strong> {{ cliente.data.gremio ? "Sí" : "No" }}</p>
+    </div>
+  </div>
+
+  <h3 *ngIf="!loading">Laburo(s) del Cliente</h3>
+
+  <div *ngIf="filteredLaburos.length > 0">
+    <div *ngIf="!loading" class="row row-cols-1 row-cols-md-2 g-4">
+      <div *ngFor="let laburo of filteredLaburos" class="col">
+        <div class="card h-100">
+          <div
+            class="card-body d-grid"
+            [ngClass]="{ pagado: laburo.data.pago || laburo.data.pagoEfectivo }"
+          >
+            <h5 class="card-title">Laburo N°: {{ laburo.data.numero }}</h5>
+            <div class="card-text">
+              <p class="mb-2">
+                Fecha: {{ laburo.data.fecha | date : "dd/MM/yyyy" }}
+              </p>
+              <p class="mb-2">
+                Fecha de Entrega:
+                {{ laburo.data.fechaEntrega | date : "dd/MM/yyyy" }}
+              </p>
+
+              <p class="mb-2">Trabajo: {{ laburo.data.trabajo }}</p>
+
+              <p class="mb-2" style="max-height: 100px; overflow-y: auto">
+                Detalle: {{ laburo.data.detalle }}
+              </p>
+
+              <p class="mb-2">
+                <strong>Total: {{ laburo.data.precio | currency }}</strong>
+              </p>
+
+              <p class="mb-2">Seña: {{ laburo.data.sena | currency }}</p>
+
+              <span *ngIf="laburo.data.sena > 0">
+                <span
+                  *ngIf="laburo.data.cajaSena === 'transferencia'"
+                  class="transferencia-color"
+                >
+                  <p class="mb-2">Caja Seña: {{ laburo.data.cajaSena }}</p>
+                </span>
+
+                <span
+                  *ngIf="laburo.data.cajaSena === 'efectivo'"
+                  class="efectivo-color"
+                >
+                  <p class="mb-2">Caja Seña: {{ laburo.data.cajaSena }}</p>
+                </span>
+              </span>
+
+              <span *ngIf="laburo.data.cajaSena === 'transferencia'">
+                <p class="mb-2">
+                  Cuenta Seña: {{ laburo.data.cuentaNombreSena }}
+                </p>
+              </span>
+
+              <span *ngIf="laburo.data.pagoEfectivo">
+                <p class="mb-2">
+                  Pago Final efectivo
+                  {{ laburo.data.pagoEfectivo | currency }}
+                </p>
+              </span>
+              <span
+                *ngIf="
+                  laburo.data.cajaFinalEfectivo === 'efectivo' &&
+                  laburo.data.pagoEfectivo
+                "
+                class="efectivo-color"
+              >
+                <p class="mb-2">
+                  Caja Final :
+                  {{ laburo.data.cajaFinalEfectivo }}
+                </p>
+              </span>
+
+              <span *ngIf="laburo.data.pago">
+                <p class="mb-2">
+                  Pago Final Transferencia {{ laburo.data.pago | currency }}
+                </p>
+              </span>
+              <span
+                *ngIf="
+                  laburo.data.cajaFinal === 'transferencia' && laburo.data.pago
+                "
+                class="transferencia-color"
+              >
+                <p class="mb-2">Caja Final: {{ laburo.data.cajaFinal }}</p>
+              </span>
+
+              <span
+                *ngIf="
+                  laburo.data.cajaFinal === 'transferencia' && laburo.data.pago
+                "
+              >
+                <p class="mb-2">
+                  Cuenta Final: {{ laburo.data.cuentaNombreFinal }}
+                </p>
+              </span>
+              <span *ngIf="laburo.data.comentario !== ''">
+                <p class="mb-2">Comentario: {{ laburo.data.comentario }}</p>
+              </span>
+            </div>
+            <div class="mt-auto">
+              <button
+                *ngIf="esAdmin"
+                type="button"
+                class="btn btn-primary me-2"
+                (click)="modificar(laburo)"
+              >
+                <i class="fas fa-edit"></i>
+              </button>
+              <button
+                *ngIf="esAdmin"
+                type="button"
+                class="btn btn-danger me-2"
+                (click)="borrar(laburo)"
+              >
+                <i class="fas fa-trash"></i>
+              </button>
+
+              <button
+                *ngIf="!laburo.data.pago && !laburo.data.pagoEfectivo"
+                type="button"
+                class="btn btn-success me-2"
+                (click)="agregarPago(laburo)"
+              >
+                <i class="fa-solid fa-plus"> </i>Pago
+              </button>
+
+              <button
+                *ngIf="!laburo.data.comentario"
+                type="button"
+                class="btn btn-secondary me-2"
+                (click)="agregarComentario(laburo)"
+              >
+                <i class="fa-solid fa-plus"> </i>Comentario
+              </button>
+              <button
+                *ngIf="laburo.data.comprobantePago"
+                type="button"
+                class="btn btn-secondary me-2"
+                (click)="mostrarComprobante(laburo, 2)"
+              >
+                <i class="fa-solid fa-eye"></i> Pago
+              </button>
+
+              <button
+                *ngIf="laburo.data.comprobanteSena"
+                type="button"
+                class="btn btn-secondary me-2"
+                (click)="mostrarComprobante(laburo, 1)"
+              >
+                <i class="fa-solid fa-eye"></i> Seña
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+  </div><div *ngIf="filteredLaburos.length === 0">
+      <p>No hay laburos para este cliente.</p>
+    </div>
+</div>

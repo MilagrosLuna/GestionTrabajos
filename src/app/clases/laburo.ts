@@ -1,4 +1,5 @@
 export class Laburo {
+  clienteid: string = '';
   cliente: string = '';
   fecha: Date = new Date();
   fechaEntrega: Date = new Date();

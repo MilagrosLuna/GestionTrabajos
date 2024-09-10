@@ -46,6 +46,11 @@ import { ModalRetiroComponent } from './components/modals/modal-retiro/modal-ret
 import { PresupuestosComponent } from './components/presupuestos/presupuestos.component';
 import { HttpClientModule } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
+import { AltaClienteComponent } from './components/altaCliente/altaCliente.component';
+import { ListadoClientesComponent } from './components/listado-clientes/listado-clientes.component';
+import { FiltroLaburosClientesComponent } from './components/filtro-laburos-clientes/filtro-laburos-clientes.component';
+
+
 const firebaseConfig = environment.firebaseConfig;
 @NgModule({
   declarations: [
@@ -58,6 +63,7 @@ const firebaseConfig = environment.firebaseConfig;
     NavbarComponent,
     FooterComponent,
     AltaComponent,
+    AltaClienteComponent,
     ListadoComponent,
     ModalComponent,
     ModalDeleteComponent,
@@ -69,6 +75,8 @@ const firebaseConfig = environment.firebaseConfig;
     CajaComponent,
     ModalRetiroComponent,
     PresupuestosComponent,
+    ListadoClientesComponent,
+    FiltroLaburosClientesComponent,
   ],
   imports: [
     CurrencyPipe,

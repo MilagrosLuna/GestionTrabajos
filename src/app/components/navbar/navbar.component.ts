@@ -46,9 +46,9 @@ export class NavbarComponent implements OnDestroy, OnInit {
   }
 
   async verificar() {
-    this.admins = await this.firebase.obtener('admins');
+    this.admins = await this.firebase.obtener('admins');  
     let user = localStorage.getItem('logueado');
-    this.esAdmin = this.admins.some((admin) => admin.data.id === user);
+    this.esAdmin = this.admins.some((admin) => admin.data.id === user);   
   }
 
   async logOut() {

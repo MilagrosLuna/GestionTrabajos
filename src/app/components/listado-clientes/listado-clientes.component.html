@@ -1,0 +1,112 @@
+<div class="container py-5">
+  <!-- Search Input -->
+  <div class="input-group mb-3">
+    <input
+      [(ngModel)]="searchTerm"
+      (keyup)="search()"
+      placeholder="Buscar"
+      class="form-control"
+    />
+    <span class="input-group-text" id="basic-addon2">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="16"
+        height="16"
+        fill="currentColor"
+        class="bi bi-search"
+        viewBox="0 0 16 16"
+      >
+        <path
+          d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"
+        />
+      </svg>
+    </span>
+  </div>
+
+  <!-- Clients List -->
+  <div class="container py-5">
+
+    <div *ngIf="loading" class="text-center">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Cargando...</span>
+      </div>
+    </div>
+
+    <div *ngIf="!loading" class="row row-cols-1 row-cols-md-2 g-4">
+      <div *ngFor="let cliente of filteredClientes" class="col">
+        <div class="card h-100">
+          <div class="card-body d-grid">
+            <h5 class="card-title">
+              <p>Cliente N°: {{ cliente.data.clienteNumero }}</p>
+              <p>
+                {{
+                  cliente.data.nombre &&
+                    cliente.data.nombre.charAt(0).toUpperCase() +
+                      cliente.data.nombre.slice(1).toLowerCase()
+                }}
+                {{
+                  cliente.data.apellido &&
+                    cliente.data.apellido.charAt(0).toUpperCase() +
+                      cliente.data.apellido.slice(1).toLowerCase()
+                }}
+              </p>
+            </h5>
+
+            <div class="card-text">
+              <div class="card-text">
+                <p>Email: {{ cliente.data.email }}</p>
+                <p>Teléfono: {{ cliente.data.telefono }}</p>
+                <p>Gremio: {{ cliente.data.gremio ? "Sí" : "No" }}</p>
+              </div>
+              <div class="mt-auto">
+                <button
+                  type="button"
+                  class="btn btn-info me-2"
+                  (click)="buscarLaburos(cliente)"
+                >
+                  <i class="fas fa-search"></i>
+                </button>
+                
+                <button
+                  *ngIf="esAdmin"
+                  type="button"
+                  class="btn btn-primary me-2"
+                  (click)="modificar(cliente)"
+                >
+                  <i class="fas fa-edit"></i>
+                </button>
+
+                <button
+                  *ngIf="esAdmin"
+                  type="button"
+                  class="btn btn-danger me-2"
+                  (click)="borrar(cliente)"
+                >
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="!loading && (!allClientsLoaded || hasMoreClients)" class="d-flex justify-content-around mt-4">
+      <button
+        *ngIf="!allClientsLoaded"
+        (click)="loadAllClientes()"
+        class="btn btn-secondary"
+        [disabled]="loading || !hasMoreClients"
+      >
+        Ver Todos
+      </button>
+      <button
+        (click)="loadMoreClientes()"
+        [disabled]="loading || !hasMoreClients"
+        class="btn btn-primary"
+      >
+        Ver Más
+      </button>
+    </div>
+  </div>
+</div>
