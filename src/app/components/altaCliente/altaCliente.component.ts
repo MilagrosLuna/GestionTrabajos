@@ -21,7 +21,6 @@ export class AltaClienteComponent {
   async ngOnInit(): Promise<void> {
     this.form = new FormGroup({
       clienteNombre: new FormControl('', [Validators.required]),
-      clienteApellido: new FormControl('', [Validators.required]),
       email: new FormControl('', [Validators.required, Validators.email]),
       telefono: new FormControl('', [Validators.required]),
       gremio: new FormControl(false),
@@ -59,7 +58,6 @@ export class AltaClienteComponent {
     const nuevoCliente = new Cliente(
       contador,
       this.form.value.clienteNombre.toLowerCase(),
-      this.form.value.clienteApellido.toLowerCase(),
       this.form.value.email,
       this.form.value.telefono,
       this.form.value.gremio

@@ -1,7 +1,7 @@
 export class Cliente {
   clienteNumero: number;
   nombre: string;
-  apellido: string;
+  // apellido: string;
   email: string;
   telefono: string;
 
@@ -10,7 +10,7 @@ export class Cliente {
   constructor(
     clienteNumero: number,
     nombre: string,
-    apellido: string,
+    // apellido: string,
     email: string,
     telefono: string,
 
@@ -18,7 +18,7 @@ export class Cliente {
   ) {
     this.clienteNumero = clienteNumero;
     this.nombre = nombre;
-    this.apellido = apellido;
+    // this.apellido = apellido;
     this.email = email;
     this.telefono = telefono;
 

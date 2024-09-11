@@ -29,31 +29,7 @@
             </div>
           </div>
 
-          <div class="m-3">
-            <mdb-form-control>
-              <input
-                mdbInput
-                type="text"
-                id="clienteApellido"
-                class="form-control"
-                formControlName="clienteApellido"
-              />
-              <label mdbLabel class="form-label" for="clienteApellido"
-                >Apellido</label
-              >
-            </mdb-form-control>
-            <div *ngIf="form.controls['clienteApellido'].errors != null">
-              <small
-                class="invalid"
-                *ngIf="
-                  form.controls['clienteApellido'].errors!['required'] &&
-                  form.controls['clienteApellido'].touched
-                "
-                >Debe ingresar el apellido del cliente.</small
-              >
-            </div>
-          </div>
-
+       
           <div class="m-3">
             <mdb-form-control>
               <input

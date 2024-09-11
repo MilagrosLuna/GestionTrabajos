@@ -267,10 +267,7 @@ export class ListadoComponent {
 
     if (laburoCopy.data.clienteid) {
       // console.log(laburoCopy);
-      laburoCopy.data.cliente =
-        laburoCopy.data.clienteInfo.nombre +
-        ' ' +
-        laburoCopy.data.clienteInfo.apellido;
+      laburoCopy.data.cliente = laburoCopy.data.clienteInfo.nombre;
     }
 
     let pdfDefinition: any = {

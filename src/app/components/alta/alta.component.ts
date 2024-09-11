@@ -33,7 +33,7 @@ export class AltaComponent {
     this.form = new FormGroup({
       clienteName: new FormControl('', [Validators.required]),
       esClienteAnonimo: new FormControl(false),
-      clienteSurname: new FormControl(''),
+      // clienteSurname: new FormControl(''),
       cliente: new FormControl('', [Validators.required]),
       fecha: new FormControl(this.getCurrentDate(), [Validators.required]),
       fechaEntrega: new FormControl(this.getFutureDate(), [
@@ -73,56 +73,18 @@ export class AltaComponent {
     this.clientes = await this.firebase.obtener('clientes');
   }
 
-  // async buscarCliente() {
-  //   const nombre = this.form.controls['clienteName'].value.trim().toLowerCase();
-  //   const apellido = this.form.controls['clienteSurname'].value.trim().toLowerCase();
-
-  //   if (nombre || apellido) {
-  //     this.clientesFiltered = this.clientes.filter((cliente) => {
-  //       const nombreCliente = cliente.data.nombre.toLowerCase().trim();
-  //       const apellidoCliente = cliente.data.apellido.toLowerCase().trim();
-
-  //       const coincideNombre = nombre && nombreCliente.includes(nombre);
-  //       const coincideApellido = apellido && apellidoCliente.includes(apellido);
-
-  //       return coincideNombre || coincideApellido;
-  //     });
-
-  //     if (this.clientesFiltered.length === 0) {
-  //       this.alerts.showErrorMessage('No se encontraron resultados.');
-  //     }
-  //   } else {
-  //     this.alerts.showErrorMessage('Ingrese al menos una parte del nombre o apellido para buscar.');
-  //   }
-  // }
   async buscarCliente() {
     const nombre = this.form.controls['clienteName'].value.trim().toLowerCase();
-    const apellido = this.form.controls['clienteSurname'].value
-      .trim()
-      .toLowerCase();
-
-    if (nombre || apellido) {
-      // Primero, filtra clientes que coincidan con ambos, nombre y apellido
+   
+    if (nombre) {
+    
       let clientesCoincidenAmbos = this.clientes.filter((cliente) => {
         const nombreCliente = cliente.data.nombre.toLowerCase().trim();
-        const apellidoCliente = cliente.data.apellido.toLowerCase().trim();
 
         return (
-          nombreCliente.includes(nombre) && apellidoCliente.includes(apellido)
+          nombreCliente.includes(nombre) 
         );
       });
-
-      // Si no hay coincidencias exactas, filtra por nombre o apellido
-      if (clientesCoincidenAmbos.length === 0) {
-        clientesCoincidenAmbos = this.clientes.filter((cliente) => {
-          const nombreCliente = cliente.data.nombre.toLowerCase().trim();
-          const apellidoCliente = cliente.data.apellido.toLowerCase().trim();
-
-          return (
-            nombreCliente.includes(nombre) || apellidoCliente.includes(apellido)
-          );
-        });
-      }
 
       this.clientesFiltered = clientesCoincidenAmbos;
 
@@ -131,14 +93,14 @@ export class AltaComponent {
       }
     } else {
       this.alerts.showErrorMessage(
-        'Ingrese al menos una parte del nombre o apellido para buscar.'
+        'Ingrese al menos una parte del nombre para buscar.'
       );
     }
   }
 
   selectCliente(cliente: any) {
     this.form.controls['cliente'].setValue(cliente.id);
-    this.selectedClienteInfo = `N° ${cliente.data.clienteNumero} - ${cliente.data.nombre} ${cliente.data.apellido} - ${cliente.data.telefono} - ${cliente.data.email}`;
+    this.selectedClienteInfo = `N° ${cliente.data.clienteNumero} - ${cliente.data.nombre} - ${cliente.data.telefono} - ${cliente.data.email}`;
     this.clientesFiltered = [];
   }
 

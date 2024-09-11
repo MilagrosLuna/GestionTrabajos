@@ -45,31 +45,7 @@
             </div>
           </div>
           <div *ngIf="!form.controls['esClienteAnonimo'].value">
-            <div class="m-3">
-              <mdb-form-control>
-                <input
-                  mdbInput
-                  type="text"
-                  id="clienteSurname"
-                  class="form-control"
-                  formControlName="clienteSurname"
-                  placeholder="Apellido del cliente"
-                />
-                <label mdbLabel class="form-label" for="clienteSurname"
-                  >Apellido</label
-                >
-              </mdb-form-control>
-              <div *ngIf="form.controls['clienteSurname'].errors != null">
-                <small
-                  class="invalid"
-                  *ngIf="
-                    form.controls['clienteSurname'].errors!['required'] &&
-                    form.controls['clienteSurname'].touched
-                  "
-                  >Debe ingresar el apellido del cliente.</small
-                >
-              </div>
-            </div>
+       
             <div class="m-3">
               <button
                 type="button"
@@ -89,7 +65,7 @@
                 *ngFor="let cliente of clientesFiltered"
                 (click)="selectCliente(cliente)"
               >
-                {{ cliente.data.nombre }} {{ cliente.data.apellido }} -
+                {{ cliente.data.nombre }} -
                 {{ cliente.data.telefono }} - {{ cliente.data.email }}
               </button>
             </div>
