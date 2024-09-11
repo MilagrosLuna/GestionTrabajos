@@ -16,7 +16,7 @@ export class ListadoClientesComponent implements OnInit {
   searchTerm: string = '';
   loading: boolean = false;
   ultimoDoc: any = null;
-  clientesPorPagina: number = 2;
+  clientesPorPagina: number = 8;
   esAdmin: boolean = false;
   admins: any[] = [];
   allClientsLoaded: boolean = false;

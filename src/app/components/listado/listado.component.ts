@@ -264,6 +264,15 @@ export class ListadoComponent {
     if (!laburoCopy.data.comentario || laburoCopy.data.comentario === '') {
       laburoCopy.data.comentario = '---';
     }
+
+    if (laburoCopy.data.clienteid) {
+      // console.log(laburoCopy);
+      laburoCopy.data.cliente =
+        laburoCopy.data.clienteInfo.nombre +
+        ' ' +
+        laburoCopy.data.clienteInfo.apellido;
+    }
+
     let pdfDefinition: any = {
       content: [
         {

@@ -58,8 +58,8 @@ export class AltaClienteComponent {
 
     const nuevoCliente = new Cliente(
       contador,
-      this.form.value.clienteNombre,
-      this.form.value.clienteApellido,
+      this.form.value.clienteNombre.toLowerCase(),
+      this.form.value.clienteApellido.toLowerCase(),
       this.form.value.email,
       this.form.value.telefono,
       this.form.value.gremio
