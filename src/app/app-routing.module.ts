@@ -15,6 +15,7 @@ import { PresupuestosComponent } from './components/presupuestos/presupuestos.co
 import { AltaClienteComponent } from './components/altaCliente/altaCliente.component';
 import { ListadoClientesComponent } from './components/listado-clientes/listado-clientes.component';
 import { FiltroLaburosClientesComponent } from './components/filtro-laburos-clientes/filtro-laburos-clientes.component';
+import { TablaLaburoComponent } from './components/tabla-laburo/tabla-laburo.component';
 
 const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -34,6 +35,7 @@ const routes: Routes = [
       { path: 'cuentas', component: CuentasComponent },
       { path: 'caja', component: CajaComponent },
       { path: 'presupuestos', component: PresupuestosComponent },
+      { path: 'tabla', component: TablaLaburoComponent },
     ],
   },
   { path: '', redirectTo: '/login', pathMatch: 'full' },

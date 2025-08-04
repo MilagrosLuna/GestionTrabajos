@@ -41,6 +41,14 @@
             *ngIf="esAdmin"
             type="button"
             class="btn btn-link px-3 me-2"
+            (click)="goTo('home/tabla')"
+          >
+            tabla
+          </button>
+          <button
+            *ngIf="esAdmin"
+            type="button"
+            class="btn btn-link px-3 me-2"
             (click)="goTo('home/caja')"
           >
             caja
@@ -51,7 +59,7 @@
             class="btn btn-link px-3 me-2"
             (click)="goTo('home/graficos')"
           >
-            Ver graficos
+            Graficos
           </button>
           <button
             type="button"
@@ -75,7 +83,7 @@
             class="btn btn-link text-danger px-3 me-2"
             (click)="goTo('home/listadoC')"
           >
-            Ver clientes
+            clientes
           </button>
           <button
             type="button"
@@ -89,7 +97,7 @@
             class="btn btn-link px-3 me-2"
             (click)="goTo('home/listado')"
           >
-            Ver trabajos
+            Trabajos
           </button>
           <button
             type="button"

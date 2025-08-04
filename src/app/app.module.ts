@@ -49,8 +49,12 @@ import { environment } from 'src/environments/environment';
 import { AltaClienteComponent } from './components/altaCliente/altaCliente.component';
 import { ListadoClientesComponent } from './components/listado-clientes/listado-clientes.component';
 import { FiltroLaburosClientesComponent } from './components/filtro-laburos-clientes/filtro-laburos-clientes.component';
-
-
+import { TablaLaburoComponent } from './components/tabla-laburo/tabla-laburo.component';
+import { MatTableModule } from '@angular/material/table';
+import { MatSortModule } from '@angular/material/sort';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatButtonModule } from '@angular/material/button';
 const firebaseConfig = environment.firebaseConfig;
 @NgModule({
   declarations: [
@@ -77,14 +81,20 @@ const firebaseConfig = environment.firebaseConfig;
     PresupuestosComponent,
     ListadoClientesComponent,
     FiltroLaburosClientesComponent,
+    TablaLaburoComponent,
   ],
   imports: [
     CurrencyPipe,
+    MatCheckboxModule,
+    MatButtonModule,
     HttpClientModule,
     BrowserModule,
     AppRoutingModule,
     ReactiveFormsModule,
     FormsModule,
+    MatTableModule,
+    MatTooltipModule,
+    MatSortModule,
     MdbAccordionModule,
     MdbCarouselModule,
     MdbCheckboxModule,

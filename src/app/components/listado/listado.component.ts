@@ -258,6 +258,7 @@ export class ListadoComponent {
     let fechaEmision = `${now.getDate()}/${
       now.getMonth() + 1
     }/${now.getFullYear()} a las ${now.getHours()}:${now.getMinutes()} hs`;
+
     if (!laburoCopy.data.numero) {
       laburoCopy.data.numero = 0;
     }
@@ -266,59 +267,91 @@ export class ListadoComponent {
     }
 
     if (laburoCopy.data.clienteid) {
-      // console.log(laburoCopy);
       laburoCopy.data.cliente = laburoCopy.data.clienteInfo.nombre;
     }
+    console.log(laburo);
+    const precioTotal = laburoCopy.data.precio || 0;
+    const senia = laburoCopy.data.sena || 0;
+    const saldoPendiente = precioTotal - senia;
+    const estadoPago =
+      saldoPendiente <= 0
+        ? 'PAGADO EN SU TOTALIDAD'
+        : `Saldo pendiente: $${saldoPendiente}`;
+
+    const generarContenido = () => [
+      {
+        text: `Orden de impresión laburo N°: ${laburoCopy.data.numero}`,
+        fontSize: 20,
+        margin: [0, 5, 0, 0],
+      },
+      {
+        text: `Fecha de emisión: ${fechaEmision}`,
+        fontSize: 16,
+        margin: [0, 5, 0, 0],
+      },
+      {
+        text: `-------------------------------------------------------------------------------------------------------------------`,
+        fontSize: 16,
+        margin: [0, 10, 0, 0],
+      },
+      {
+        text: `Cliente: ${laburoCopy.data.cliente}   `,
+        fontSize: 16,
+        margin: [0, 8, 0, 0],
+      },
+      {
+        text: `Trabajo: ${laburoCopy.data.trabajo}, ${laburoCopy.data.detalle} `,
+        fontSize: 16,
+        margin: [0, 8, 0, 0],
+      },
+      {
+        text: `Fecha: ${laburoCopy.data.fecha}\nFecha de Entrega: ${laburoCopy.data.fechaEntrega} `,
+        fontSize: 16,
+        margin: [0, 8, 0, 0],
+      },
+      {
+        text: `Precio Total: $${precioTotal}\nSeña: $${senia}\n${estadoPago}`,
+        fontSize: 16,
+        margin: [0, 8, 0, 0],
+      },
+      {
+        text: `Comentarios:  ${laburoCopy.data.comentario} `,
+        fontSize: 16,
+        margin: [0, 5, 0, 0],
+      },
+    ];
 
     let pdfDefinition: any = {
       content: [
+        ...generarContenido(),
         {
-          text: `Orden de impresión laburo N°: ${laburoCopy.data.numero}`,
-          fontSize: 20,
-          margin: [0, 5, 0, 0],
+          text: [
+            'Las señas no se reembolsarán en caso de desistimiento del pedido, o si el trabajo ya está en proceso de impresión o armado.\n',
+            'En caso de no haberse realizado el diseño, se podrá devolver la seña descontando el costo correspondiente al diseño.\n',
+            'Las fechas de entrega son estimadas y pueden variar según la carga de trabajo u otros factores externos.\n',
+          ],
+          fontSize: 9,
+          margin: [0, 20, 0, 10],
+          alignment: 'center',
         },
-        {
-          text: `Fecha de emisión: ${fechaEmision}`,
-          fontSize: 16,
-          margin: [0, 5, 0, 0],
-        },
-        {
-          text: `-------------------------------------------------------------------------------------------------------------------`,
-          fontSize: 16,
-          margin: [0, 10, 0, 0],
-        },
-        {
-          text: `Cliente: ${laburoCopy.data.cliente} `,
-          fontSize: 16,
-          margin: [0, 8, 0, 0],
-        },
-        {
-          text: `Trabajo: ${laburoCopy.data.trabajo}, ${laburoCopy.data.detalle} `,
-          fontSize: 16,
-          margin: [0, 8, 0, 0],
-        },
-        {
-          text: `Fecha: ${laburoCopy.data.fecha}
-          Fecha de Entrega: ${laburoCopy.data.fechaEntrega} `,
-          fontSize: 16,
-          margin: [0, 8, 0, 0],
-        },
-        {
-          text: `Precio: $${laburoCopy.data.precio}
-          Seña: $${laburoCopy.data.sena} `,
-          fontSize: 16,
-          margin: [0, 8, 0, 0],
-        },
-        {
-          text: `Comentarios:  ${laburoCopy.data.comentario} `,
-          fontSize: 16,
-          margin: [0, 5, 0, 0],
-        },
+        { text: '', pageBreak: 'after' },
+        ...generarContenido(),
+        { text: '', pageBreak: 'after' },
+        ...generarContenido(),
       ],
+      footer: (currentPage: any, pageCount: any) => ({
+        margin: [10, 10, 10, 20],
+        columns: [
+          {
+            text: 'Por consultas comunicarse al: 11 6942-8551 / 15-4084-3420   Email: artesgraficasphoenix@gmail.com',
+            fontSize: 12,
+            alignment: 'center',
+          },
+        ],
+      }),
     };
 
     const pdf = pdfMake.createPdf(pdfDefinition);
-    //pdf.download(`laburo_${laburo.data.numero}`);
     pdf.open();
   }
 }

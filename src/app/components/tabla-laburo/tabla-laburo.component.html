@@ -1,0 +1,233 @@
+<div class="py-5 m-3">
+  <div *ngIf="loading">Cargando...</div>
+  <button
+    mat-raised-button
+    color="warn"
+    (click)="borrarSeleccionados()"
+    [disabled]="selection.isEmpty() || loading"
+  >
+    Borrar seleccionados
+  </button>
+
+  <table
+    mat-table
+    [dataSource]="dataSource"
+    matSort
+    *ngIf="!loading"
+    class="mat-elevation-z8 tabla-responsive"
+  >
+    <ng-container matColumnDef="select">
+      <th mat-header-cell *matHeaderCellDef>
+        <mat-checkbox
+          (change)="$event ? masterToggle() : null"
+          [checked]="isAllSelected()"
+          [indeterminate]="selection.hasValue() && !isAllSelected()"
+          aria-label="Seleccionar todos"
+        >
+        </mat-checkbox>
+      </th>
+      <td mat-cell *matCellDef="let row">
+        <mat-checkbox
+          (click)="$event.stopPropagation()"
+          (change)="$event ? selection.toggle(row) : null"
+          [checked]="selection.isSelected(row)"
+          aria-label="Seleccionar fila"
+        >
+        </mat-checkbox>
+      </td>
+    </ng-container>
+
+    <!-- Número -->
+    <ng-container matColumnDef="numero">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>N°</th>
+      <td mat-cell *matCellDef="let laburo">{{ laburo.numero || "--" }}</td>
+    </ng-container>
+    <!-- Estado -->
+    <!-- Estado -->
+    <ng-container matColumnDef="estado">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Estado</th>
+      <td mat-cell *matCellDef="let laburo">
+        <span
+          [ngClass]="{
+            'estado-pagado':
+              laburo.sena + laburo.pago + laburo.pagoEfectivo >= laburo.precio,
+            'estado-pendiente':
+              laburo.sena + laburo.pago + laburo.pagoEfectivo < laburo.precio
+          }"
+        >
+          {{
+            laburo.sena + laburo.pago + laburo.pagoEfectivo >= laburo.precio
+              ? "Pagado"
+              : "Falta"
+          }}
+        </span>
+      </td>
+    </ng-container>
+    <!-- Falta Pagar -->
+    <ng-container matColumnDef="faltaPagar">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Falta Pagar</th>
+      <td mat-cell *matCellDef="let laburo">
+        {{
+          (laburo.precio || 0) -
+            ((laburo.sena || 0) +
+              (laburo.pago || 0) +
+              (laburo.pagoEfectivo || 0)) | currency
+        }}
+      </td>
+    </ng-container>
+
+    <!-- Cliente -->
+    <ng-container matColumnDef="cliente">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Cliente</th>
+      <td mat-cell *matCellDef="let laburo">
+        <span *ngIf="!laburo.clienteid">
+          {{
+            laburo.cliente
+              ? laburo.cliente.charAt(0).toUpperCase() +
+                laburo.cliente.slice(1).toLowerCase()
+              : ""
+          }}
+        </span>
+        <span *ngIf="laburo.clienteid">
+          {{
+            laburo.clienteInfo?.nombre
+              ? laburo.clienteInfo.nombre.charAt(0).toUpperCase() +
+                laburo.clienteInfo.nombre.slice(1).toLowerCase()
+              : ""
+          }}
+          {{
+            laburo.clienteInfo?.apellido
+              ? laburo.clienteInfo.apellido.charAt(0).toUpperCase() +
+                laburo.clienteInfo.apellido.slice(1).toLowerCase()
+              : ""
+          }}
+        </span>
+      </td>
+    </ng-container>
+
+    <!-- Cliente Info -->
+    <!-- <ng-container matColumnDef="clienteInfo">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Info Cliente</th>
+      <td mat-cell *matCellDef="let laburo">
+        <div *ngIf="laburo.clienteid">
+          N°{{ laburo.clienteInfo?.clienteNumero }}<br />
+          Email: {{ laburo.clienteInfo?.email }}<br />
+          Tel: {{ laburo.clienteInfo?.telefono }}<br />
+          Gremio:
+          {{ laburo.clienteInfo?.gremio ? "Pertenece" : "No Pertenece" }}
+        </div>
+      </td>
+    </ng-container> -->
+
+    <!-- Cliente Info -->
+    <!-- <ng-container matColumnDef="clienteInfo">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Email Cliente</th>
+      <td mat-cell *matCellDef="let laburo">
+        <span *ngIf="laburo.clienteid">{{ laburo.clienteInfo?.email }}</span>
+      </td>
+    </ng-container> -->
+
+    <!-- Fecha -->
+    <ng-container matColumnDef="fecha">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Fecha</th>
+      <td mat-cell *matCellDef="let laburo">
+        {{ laburo.fecha | date : "dd/MM/yyyy" }}
+      </td>
+    </ng-container>
+
+    <!-- Trabajo -->
+    <ng-container matColumnDef="trabajo">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Trabajo</th>
+      <td mat-cell *matCellDef="let laburo">
+        <span
+          class="celda-cortada"
+          [matTooltip]="laburo.trabajo"
+          matTooltipPosition="above"
+        >
+          {{ laburo.trabajo }}
+        </span>
+      </td>
+    </ng-container>
+
+    <!-- Detalle -->
+    <ng-container matColumnDef="detalle">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Detalle</th>
+      <td mat-cell *matCellDef="let laburo">
+        <span
+          class="celda-cortada"
+          [matTooltip]="laburo.detalle"
+          matTooltipPosition="above"
+        >
+          {{ laburo.detalle }}
+        </span>
+      </td>
+    </ng-container>
+
+    <!-- Precio -->
+    <ng-container matColumnDef="precio">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header mat-sort-header>
+        Total
+      </th>
+      <td mat-cell *matCellDef="let laburo">{{ laburo.precio | currency }}</td>
+    </ng-container>
+
+    <!-- Seña -->
+    <ng-container matColumnDef="sena">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Seña</th>
+      <td mat-cell *matCellDef="let laburo">{{ laburo.sena | currency }}</td>
+    </ng-container>
+
+    <!-- Caja Seña -->
+    <ng-container matColumnDef="cajaSena">
+      <th mat-header-cell *matHeaderCellDef>Caja Seña</th>
+      <td mat-cell *matCellDef="let laburo">{{ laburo.cajaSena }}</td>
+    </ng-container>
+
+    <!-- Cuenta Seña -->
+    <ng-container matColumnDef="cuentaNombreSena">
+      <th mat-header-cell *matHeaderCellDef>Cuenta Seña</th>
+      <td mat-cell *matCellDef="let laburo">{{ laburo.cuentaNombreSena }}</td>
+    </ng-container>
+
+    <!-- Pago Efectivo -->
+    <ng-container matColumnDef="pagoEfectivo">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Pago Efectivo</th>
+      <td mat-cell *matCellDef="let laburo">
+        {{ laburo.pagoEfectivo | currency }}
+      </td>
+    </ng-container>
+
+    <!-- Caja Final Efectivo -->
+    <ng-container matColumnDef="cajaFinalEfectivo">
+      <th mat-header-cell *matHeaderCellDef>Caja Final Efectivo</th>
+      <td mat-cell *matCellDef="let laburo">{{ laburo.cajaFinalEfectivo }}</td>
+    </ng-container>
+
+    <!-- Pago Transferencia -->
+    <ng-container matColumnDef="pago">
+      <th mat-header-cell *matHeaderCellDef>Pago Transferencia</th>
+      <td mat-cell *matCellDef="let laburo">{{ laburo.pago | currency }}</td>
+    </ng-container>
+
+    <!-- Caja Final -->
+    <ng-container matColumnDef="cajaFinal">
+      <th mat-header-cell *matHeaderCellDef>Caja Final</th>
+      <td mat-cell *matCellDef="let laburo">{{ laburo.cajaFinal }}</td>
+    </ng-container>
+
+    <!-- Cuenta Final -->
+    <ng-container matColumnDef="cuentaNombreFinal">
+      <th mat-header-cell *matHeaderCellDef>Cuenta Final</th>
+      <td mat-cell *matCellDef="let laburo">{{ laburo.cuentaNombreFinal }}</td>
+    </ng-container>
+
+    <!-- Comentario -->
+    <!-- <ng-container matColumnDef="comentario">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Comentario</th>
+      <td mat-cell *matCellDef="let laburo">{{ laburo.comentario }}</td>
+    </ng-container> -->
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+  </table>
+</div>
