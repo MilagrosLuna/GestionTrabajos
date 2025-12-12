@@ -45,8 +45,8 @@ export class CajaComponent {
   private async loadMovimientos(): Promise<void> {
     this.movimientos = (await this.firebase.obtener('movimientos')).sort(
       (a, b) => {
-        const dateA = new Date(a.data.fecha);
-        const dateB = new Date(b.data.fecha);
+        const dateA = new Date(a.data.createdAt ?? a.data.fecha);
+        const dateB = new Date(b.data.createdAt ?? b.data.fecha);
         return dateB.getTime() - dateA.getTime();
       }
     );

@@ -7,6 +7,15 @@ import { StorageService } from 'src/app/servicesAndUtils/storage.service';
 import { Movimiento } from 'src/app/clases/movimiento';
 import { map, Observable, startWith } from 'rxjs';
 
+import { AbstractControl, ValidationErrors } from '@angular/forms';
+
+export function noWhitespaceValidator(
+  control: AbstractControl
+): ValidationErrors | null {
+  const value = (control.value ?? '').toString();
+  return value.trim().length ? null : { whitespace: true };
+}
+
 @Component({
   selector: 'app-alta',
   templateUrl: './alta.component.html',
@@ -75,15 +84,12 @@ export class AltaComponent {
 
   async buscarCliente() {
     const nombre = this.form.controls['clienteName'].value.trim().toLowerCase();
-   
+
     if (nombre) {
-    
       let clientesCoincidenAmbos = this.clientes.filter((cliente) => {
         const nombreCliente = cliente.data.nombre.toLowerCase().trim();
 
-        return (
-          nombreCliente.includes(nombre) 
-        );
+        return nombreCliente.includes(nombre);
       });
 
       this.clientesFiltered = clientesCoincidenAmbos;
@@ -166,10 +172,20 @@ export class AltaComponent {
       laburo.comprobanteSena = fotoUrl;
     }
 
-    if (this.form.value.esClienteAnonimo == true) {
-      laburo.cliente = this.form.value.clienteName;
-    } else if (this.form.value.esClienteAnonimo == false) {
+    const nombreAnon = (this.form.value.clienteName ?? '').trim();
+
+    let clienteTextoMovimiento = '';
+
+    if (this.form.value.esClienteAnonimo === true) {
+      if (!nombreAnon) {
+        this.alerts.showErrorMessage('Ingresá el nombre del cliente anónimo.');
+        return;
+      }
+      laburo.cliente = nombreAnon;
+      clienteTextoMovimiento = `${nombreAnon}`;
+    } else {
       laburo.clienteid = this.form.value.cliente;
+      clienteTextoMovimiento = this.selectedClienteInfo;
     }
 
     laburo.fecha = this.form.value.fecha;
@@ -212,10 +228,10 @@ export class AltaComponent {
     let laburoObj = JSON.parse(JSON.stringify(laburo));
 
     let id = await this.firebase.guardar(laburoObj, 'laburos');
-
+    const ahora = new Date();
     let movimiento = new Movimiento();
     movimiento.detalle =
-      this.selectedClienteInfo +
+      clienteTextoMovimiento +
       ', trabajo: ' +
       laburo.trabajo +
       ', detalle: ' +
@@ -223,7 +239,8 @@ export class AltaComponent {
       ', N° trabajo: ' +
       laburo.numero;
     movimiento.fecha = laburo.fecha;
-    movimiento.idLaburo = id.id;
+    movimiento.idLaburo = id.id; 
+    movimiento.createdAt = ahora.toISOString();
     movimiento.tipo = 'credito';
     let monto = 0;
     if (laburo.cajaSena === 'efectivo') {
@@ -239,10 +256,22 @@ export class AltaComponent {
       await this.firebase.guardar(movimientoObj, 'movimientos');
     }
     this.form.reset({
+      clienteName: '',
+      esClienteAnonimo: false,
+      cliente: '',
       fecha: this.getCurrentDate(),
       fechaEntrega: this.getFutureDate(),
+      trabajo: '',
+      detalle: '',
+      precio: '',
+      seña: '',
+      caja: '',
+      cuenta: '',
+      comprobante: '',
+      nuevaCuenta: '',
     });
     this.selectedClienteInfo = '';
+    this.clientesFiltered = [];
     this.alerts.showSuccessMessage('', 'Trabajo cargado');
   }
 

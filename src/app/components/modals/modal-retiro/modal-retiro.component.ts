@@ -41,12 +41,15 @@ export class ModalRetiroComponent {
 
   async retirarDinero(): Promise<void> {
     if (this.form.valid) {
+      let ahora = new Date();
       let movimiento = new Movimiento();
       movimiento.detalle = this.form.value.detalle;
       movimiento.idLaburo = '';
       movimiento.tipo = 'debito';
       movimiento.monto = this.form.value.monto;
       movimiento.fecha = this.form.value.fecha;
+
+      movimiento.createdAt = ahora.toISOString();
 
       if (movimiento.monto > this.saldo) {
         this.alerts.showErrorMessage(

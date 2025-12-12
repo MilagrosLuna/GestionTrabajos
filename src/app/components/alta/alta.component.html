@@ -42,10 +42,15 @@
                 "
                 >Debe ingresar el nombre del cliente.</small
               >
+              <!-- <small
+                class="invalid"
+                *ngIf="form.controls['clienteName'].errors['whitespace'] && form.controls['clienteName'].touched"
+              >
+                El nombre no puede estar vacío.
+              </small> -->
             </div>
           </div>
           <div *ngIf="!form.controls['esClienteAnonimo'].value">
-       
             <div class="m-3">
               <button
                 type="button"
@@ -65,8 +70,8 @@
                 *ngFor="let cliente of clientesFiltered"
                 (click)="selectCliente(cliente)"
               >
-                {{ cliente.data.nombre }} -
-                {{ cliente.data.telefono }} - {{ cliente.data.email }}
+                {{ cliente.data.nombre }} - {{ cliente.data.telefono }} -
+                {{ cliente.data.email }}
               </button>
             </div>
 

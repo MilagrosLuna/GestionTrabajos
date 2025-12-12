@@ -104,6 +104,7 @@ export class ModalComponent {
     let originalValue = this.originalLaburo.data[field];
     let newValue = this.laburoCopy.data[field];
 
+    const ahora = new Date();
     if (newValue !== originalValue) {
       let diferencia = newValue - originalValue;
       let tipo = diferencia > 0 ? 'credito' : 'debito';
@@ -113,7 +114,7 @@ export class ModalComponent {
         movimiento.detalle = `Modificación de una seña: ${originalValue} a ${newValue}, Laburo correspondiente: 
         ${this.laburoCopy.data.cliente}, trabajo: ${this.laburoCopy.data.trabajo}, detalle: ${this.laburoCopy.data.detalle}        
         `;
-      }else{
+      } else {
         movimiento.detalle = `Modificación de un pago: ${originalValue} a ${newValue}, Laburo correspondiente: 
         ${this.laburoCopy.data.cliente}, trabajo: ${this.laburoCopy.data.trabajo}, detalle: ${this.laburoCopy.data.detalle}        
         `;
@@ -122,6 +123,7 @@ export class ModalComponent {
       movimiento.tipo = tipo;
       movimiento.monto = Math.abs(diferencia);
       movimiento.fecha = new Date();
+      movimiento.createdAt = ahora.toISOString();
 
       if (movimiento.monto > 0) {
         let movimientoObj = JSON.parse(JSON.stringify(movimiento));

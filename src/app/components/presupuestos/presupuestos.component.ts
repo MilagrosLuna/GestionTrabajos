@@ -20,6 +20,8 @@ export class PresupuestosComponent {
     private alerts: AlertsService,
     private http: HttpClient
   ) {}
+  presupuestos: any[] = [];
+  limit = 10;
 
   async ngOnInit(): Promise<void> {
     this.form = new FormGroup({
@@ -32,6 +34,21 @@ export class PresupuestosComponent {
         Validators.min(0),
       ]),
     });
+
+    await this.loadPresupuestos();
+  }
+
+  async loadPresupuestos(): Promise<void> {
+    const all = await this.firebase.obtener('presupuestos');
+
+    this.presupuestos = all
+      .sort((a, b) => b.data.numero - a.data.numero)
+      .slice(0, this.limit);
+  }
+
+  async cargarMas(): Promise<void> {
+    this.limit += 10;
+    await this.loadPresupuestos();
   }
 
   getCurrentDate(): string {
@@ -39,6 +56,10 @@ export class PresupuestosComponent {
     const month = (today.getMonth() + 1).toString().padStart(2, '0');
     const day = today.getDate().toString().padStart(2, '0');
     return `${today.getFullYear()}-${month}-${day}`;
+  }
+
+  async volverAGenerarPDF(p: any) {
+    await this.createPDF(p.data);
   }
 
   async onSubmit(): Promise<void> {
@@ -70,7 +91,8 @@ export class PresupuestosComponent {
       // console.log(presupuesto);
       await this.createPDF(presupuesto);
       this.form.reset({
-        fecha: this.getCurrentDate(),});
+        fecha: this.getCurrentDate(),
+      });
     } else {
       this.alerts.showErrorMessage('Debe completar todos los datos');
     }

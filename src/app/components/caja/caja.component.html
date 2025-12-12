@@ -27,9 +27,16 @@
         }"
       >
         <p class="mb-0">
-          <strong>Fecha:</strong>
+          <strong>Fecha trabajo:</strong>
           {{ movimiento.data.fecha | date : "dd/MM/yyyy" }}
         </p>
+        <p class="mb-0 text-muted">
+          <small>
+            Fecha del registro (pago/retiro):
+            {{ movimiento.data.createdAt | date : "dd/MM/yyyy HH:mm" }}
+          </small>
+        </p>
+
         <p class="mb-0">
           <strong>Monto:</strong> {{ movimiento.data.monto | currency }}
         </p>

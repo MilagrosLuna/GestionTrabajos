@@ -99,6 +99,7 @@ export class ModalPagoComponent {
 
     let bool = await this.firebase.modificar(this.laburo, 'laburos');
 
+    const ahora = new Date();
     if (bool) {
       let movimiento = new Movimiento();
       movimiento.detalle =
@@ -112,6 +113,8 @@ export class ModalPagoComponent {
       movimiento.fecha = this.laburo.data.fecha;
       movimiento.idLaburo = this.laburo.id;
       movimiento.tipo = 'credito';
+
+      movimiento.createdAt = ahora.toISOString();
 
       if (this.laburo.data.cajaFinalEfectivo == 'efectivo') {
         movimiento.monto = this.laburo.data.pagoEfectivo;

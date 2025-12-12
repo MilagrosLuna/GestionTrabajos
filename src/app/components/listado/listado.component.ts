@@ -158,23 +158,41 @@ export class ListadoComponent {
     return this.cuentasMap[id] || '';
   }
 
+  getClienteSearchText(clienteInfo: any): string {
+    if (!clienteInfo) return '';
+
+    return [
+      clienteInfo.nombre,
+      clienteInfo.email,
+      clienteInfo.telefono,
+      clienteInfo.clienteNumero,
+      clienteInfo.gremio,
+    ]
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase();
+  }
+
   search() {
-    if (this.searchTerm) {
-      this.filteredLaburos = this.filteredLaburos.filter((laburo) =>
-        Object.values(laburo.data).some(
-          (value) =>
-            value &&
-            value
-              .toString()
-              .toLowerCase()
-              .includes(this.searchTerm.toLowerCase())
-        )
-      );
-    } else {
+    if (!this.searchTerm) {
       this.filteredLaburos = this.laburos.map((laburo) =>
         this.transformLaburo(laburo)
       );
+      return;
     }
+
+    const term = this.searchTerm.toLowerCase();
+
+    this.filteredLaburos = this.filteredLaburos.filter((laburo) => {
+      const dataValues = Object.values(laburo.data || {})
+        .filter(Boolean)
+        .map((v:any) => v.toString().toLowerCase())
+        .join(' ');
+
+      const clienteValues = this.getClienteSearchText(laburo.data?.clienteInfo);
+
+      return dataValues.includes(term) || clienteValues.includes(term);
+    });
   }
 
   modificar(laburo: any) {

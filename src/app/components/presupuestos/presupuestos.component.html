@@ -106,5 +106,42 @@
         </form>
       </div>
     </div>
+    <div class="card rounded-6 text-black p-3" style="margin-top: 20px; width: 100%">
+      <h5 class="mb-3">Últimos presupuestos</h5>
+
+      <div *ngIf="presupuestos.length === 0" class="text-muted">
+        No hay presupuestos cargados.
+      </div>
+
+      <div
+        *ngFor="let p of presupuestos"
+        class="d-flex justify-content-between align-items-center border rounded p-3 mb-2"
+      >
+        <div>
+          <strong>N° {{ p.data.numero }}</strong> – {{ p.data.cliente }}
+          <br />
+          <small class="text-muted">
+            {{ p.data.fecha | date : "dd/MM/yyyy" }} – ${{ p.data.precio }}
+          </small>
+        </div>
+
+        <button
+          class="btn btn-outline-primary btn-sm"
+          (click)="volverAGenerarPDF(p)"
+        >
+          Generar PDF
+        </button>
+      </div>
+
+      <div class="text-center mt-3">
+        <button
+          class="btn btn-secondary"
+          (click)="cargarMas()"
+          *ngIf="presupuestos.length >= limit"
+        >
+          Cargar más
+        </button>
+      </div>
+    </div>
   </div>
 </div>

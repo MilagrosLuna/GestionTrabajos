@@ -22,11 +22,14 @@ export class ModalDeleteComponent {
     await this.firebase.guardar(this.laburo, 'laburosArchivo');
     await this.firebase.borrar(this.laburo, 'laburos');
 
+    const ahora = new Date();
     let movimiento = new Movimiento();
     movimiento.detalle = 'ajuste x laburo eliminado';
     movimiento.idLaburo = this.laburo.id;
     movimiento.tipo = 'debito';
     movimiento.fecha = new Date();
+      movimiento.createdAt = ahora.toISOString();
+
 
     let monto = 0;
     if (this.laburo.data.cajaSena === 'efectivo') {
