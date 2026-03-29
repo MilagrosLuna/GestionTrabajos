@@ -21,7 +21,8 @@ export class PresupuestosComponent {
     private http: HttpClient
   ) {}
   presupuestos: any[] = [];
-  limit = 10;
+  ultimoDoc: any = null;
+  hayMas: boolean = true;
 
   async ngOnInit(): Promise<void> {
     this.form = new FormGroup({
@@ -39,16 +40,28 @@ export class PresupuestosComponent {
   }
 
   async loadPresupuestos(): Promise<void> {
-    const all = await this.firebase.obtener('presupuestos');
-
-    this.presupuestos = all
-      .sort((a, b) => b.data.numero - a.data.numero)
-      .slice(0, this.limit);
+    const result = await this.firebase.obtenerConPaginacion(
+      'presupuestos',
+      'numero',
+      10,
+      null
+    );
+    this.presupuestos = result.data;
+    this.ultimoDoc = result.ultimoDoc;
+    this.hayMas = result.data.length === 10;
   }
 
   async cargarMas(): Promise<void> {
-    this.limit += 10;
-    await this.loadPresupuestos();
+    if (!this.hayMas) return;
+    const result = await this.firebase.obtenerConPaginacion(
+      'presupuestos',
+      'numero',
+      10,
+      this.ultimoDoc
+    );
+    this.presupuestos = [...this.presupuestos, ...result.data];
+    this.ultimoDoc = result.ultimoDoc;
+    this.hayMas = result.data.length === 10;
   }
 
   getCurrentDate(): string {
@@ -69,21 +82,8 @@ export class PresupuestosComponent {
       presupuesto.cliente = this.form.value.cliente;
       presupuesto.fecha = this.form.value.fecha;
       presupuesto.precio = this.form.value.precio;
-      console.log(presupuesto);
 
-      const contadorSnap = await this.firebase.obtenrUno(
-        'contadores',
-        'presupuestos'
-      );
-      let contador = contadorSnap?.data['contador'];
-
-      contador++;
-
-      await this.firebase.modificar(
-        { id: 'presupuestos', data: { contador: contador } },
-        'contadores'
-      );
-
+      const contador = await this.firebase.incrementarContador('presupuestos');
       presupuesto.numero = contador;
 
       let presupuestoObj = JSON.parse(JSON.stringify(presupuesto));

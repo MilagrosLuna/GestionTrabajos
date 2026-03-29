@@ -1,9 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FirebaseService } from 'src/app/servicesAndUtils/firebase.service';
 import { Router } from '@angular/router';
-import * as pdfMake from 'pdfmake/build/pdfmake';
-import * as pdfFonts from 'pdfmake/build/vfs_fonts';
-(pdfMake as any).vfs = pdfFonts.pdfMake.vfs;
+import { AuthService } from 'src/app/servicesAndUtils/auth.service';
 
 @Component({
   selector: 'app-listado-clientes',
@@ -20,9 +18,13 @@ export class ListadoClientesComponent implements OnInit {
   esAdmin: boolean = false;
   admins: any[] = [];
   allClientsLoaded: boolean = false;
-  hasMoreClients: boolean = true; 
+  hasMoreClients: boolean = true;
 
-  constructor(private router: Router, private firebase: FirebaseService) {}
+  constructor(
+    private router: Router,
+    private firebase: FirebaseService,
+    private authService: AuthService
+  ) {}
 
   async ngOnInit(): Promise<void> {
     this.loading = true;
@@ -41,16 +43,16 @@ export class ListadoClientesComponent implements OnInit {
       this.ultimoDoc
     );
     this.clientes = [...this.clientes, ...result.data];
-    this.filteredClientes = this.clientes;
     this.ultimoDoc = result.ultimoDoc;
-    this.allClientsLoaded = result.data.length === 0; // No more clients to load
-    this.hasMoreClients = result.data.length >= this.clientesPorPagina; // Check if there are more clients
+    this.allClientsLoaded = result.data.length === 0;
+    this.hasMoreClients = result.data.length >= this.clientesPorPagina;
+    this.search();
   }
 
   async verificar() {
     this.admins = await this.firebase.obtener('admins');
-    let user = localStorage.getItem('logueado');
-    this.esAdmin = this.admins.some((admin) => admin.data.id === user);
+    const uid = this.authService.getCurrentUid();
+    this.esAdmin = this.admins.some((admin) => admin.data.id === uid);
   }
 
   async loadMoreClientes() {
@@ -60,26 +62,28 @@ export class ListadoClientesComponent implements OnInit {
   async loadAllClientes() {
     this.loading = true;
     this.allClientsLoaded = true;
+    this.hasMoreClients = false;
     this.clientes = await this.firebase.obtener('clientes');
-    this.filteredClientes = this.clientes;
+    this.search();
     this.loading = false;
   }
 
   search() {
-    if (this.searchTerm) {
-      this.filteredClientes = this.clientes.filter((cliente) =>
-        Object.values(cliente).some(
-          (value) =>
-            value &&
-            value
-              .toString()
-              .toLowerCase()
-              .includes(this.searchTerm.toLowerCase())
-        )
-      );
-    } else {
-      this.filteredClientes = this.clientes;
+    const term = this.searchTerm.trim().toLowerCase();
+
+    if (!term) {
+      this.filteredClientes = [...this.clientes];
+      return;
     }
+
+    this.filteredClientes = this.clientes.filter((cliente) => {
+      const clienteValues = Object.values(cliente.data || {})
+        .filter(Boolean)
+        .map((value: any) => value.toString().toLowerCase())
+        .join(' ');
+
+      return clienteValues.includes(term);
+    });
   }
 
   buscarLaburos(cliente: any) {

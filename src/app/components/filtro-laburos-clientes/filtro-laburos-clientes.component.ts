@@ -8,6 +8,7 @@ import { ModalComponent } from '../modals/modal/modal.component';
 import { ModalDeleteComponent } from '../modals/modal-delete/modal-delete.component';
 import { ModalPagoComponent } from '../modals/modal-pago/modal-pago.component';
 import { ModalComentarioComponent } from '../modals/modal-comentario/modal-comentario.component';
+import { AuthService } from 'src/app/servicesAndUtils/auth.service';
 
 @Component({
   selector: 'app-filtro-laburos-clientes',
@@ -21,7 +22,7 @@ export class FiltroLaburosClientesComponent implements OnInit {
   filteredLaburos: any[] = [];
   cuentas: any[] = [];
   loading: boolean = true;
-  esAdmin: boolean = true;
+  esAdmin: boolean = false;
   cuentasMap: { [id: string]: string } = {};
   cliente: any = null;
 
@@ -29,11 +30,12 @@ export class FiltroLaburosClientesComponent implements OnInit {
     private route: ActivatedRoute,
     private firebase: FirebaseService,
     private modalService: MdbModalService,
-    private confirmationService: ConfirmationService
+    private confirmationService: ConfirmationService,
+    private authService: AuthService
   ) {}
 
   async ngOnInit(): Promise<void> {
-    
+    await this.verificar();
     await this.subscribeToConfirmationEvents();
     this.route.params.subscribe(async (params) => {
       this.id = params['id'];
@@ -44,7 +46,7 @@ export class FiltroLaburosClientesComponent implements OnInit {
             'clienteid',
             this.id
           );
-          this.cliente = await this.firebase.obtenrUno('clientes', this.id);
+          this.cliente = await this.firebase.obtenerUno('clientes', this.id);
           this.cuentas = await this.firebase.obtener('cuentas');
           this.cuentas.forEach((cuenta) => {
             this.cuentasMap[cuenta.id] = cuenta.data.nombre;
@@ -63,8 +65,8 @@ export class FiltroLaburosClientesComponent implements OnInit {
 
   async verificar() {
     this.admins = await this.firebase.obtener('admins');
-    let user = localStorage.getItem('logueado');
-    this.esAdmin = this.admins.some((admin) => admin.data.id === user);
+    const uid = this.authService.getCurrentUid();
+    this.esAdmin = this.admins.some((admin) => admin.data.id === uid);
   }
 
   private transformLaburo(laburo: any): any {

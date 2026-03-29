@@ -6,7 +6,6 @@ import {
   UrlTree,
   Router,
 } from '@angular/router';
-import { Observable, map, take } from 'rxjs';
 import { AuthService } from './auth.service';
 
 @Injectable({
@@ -18,18 +17,14 @@ export class AuthGuard implements CanActivate {
   canActivate(
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
-  ):
-    | Observable<boolean | UrlTree>
-    | Promise<boolean | UrlTree>
-    | boolean
-    | UrlTree {
-    const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+  ): boolean | UrlTree {
+    const firebaseOk = this.authService.isUserAuthenticatedSnapshot();
+    const localOk = !!localStorage.getItem('logueado');
 
-    if (this.authService.isUserAuthenticated() || !!storedUser) {
+    if (firebaseOk && localOk) {
       return true;
-    } else {
-      this.router.navigate(['/login']);
-      return false;
     }
+
+    return this.router.createUrlTree(['/login']);
   }
 }

@@ -15,7 +15,7 @@ export class AlertsService {
   ) {
     Swal.fire({
       icon: 'success',
-      title: title,
+      title,
       text: message,
       toast: true,
       position: 'top-end',
@@ -28,7 +28,7 @@ export class AlertsService {
   public showSuccessMessage(message: string, title: string) {
     Swal.fire({
       icon: 'success',
-      title: title,
+      title,
       text: message,
       toast: true,
       position: 'top-end',
@@ -44,7 +44,7 @@ export class AlertsService {
   ) {
     Swal.fire({
       icon: 'error',
-      title: title,
+      title,
       text: message,
       toast: true,
       position: 'top-end',
@@ -59,7 +59,7 @@ export class AlertsService {
     title: string
   ): Promise<SweetAlertResult<any>> {
     return Swal.fire({
-      title: title,
+      title,
       text: message,
       icon: 'warning',
       showCancelButton: true,
@@ -87,7 +87,6 @@ export class AlertsService {
       text: errorMessage,
       toast: true,
       position: 'top-end',
-
       showConfirmButton: false,
       timer: 3000,
     });

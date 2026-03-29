@@ -35,16 +35,9 @@
                         form.controls['name'].errors!['required'] &&
                         form.controls['name'].touched
                       "
-                      >Debe ingresar su nombre..</small
                     >
-                    <small
-                      class="invalid"
-                      *ngIf="
-                        form.controls['name'].errors!['name'] &&
-                        form.controls['name'].touched
-                      "
-                      >Ingrese un nombre valido</small
-                    >
+                      Debe ingresar su nombre.
+                    </small>
                   </div>
                   <p></p>
                   <mdb-form-control>
@@ -55,9 +48,9 @@
                       class="form-control"
                       formControlName="email"
                     />
-                    <label mdbLabel class="form-label" for="typeEmail"
-                      >Email</label
-                    >
+                    <label mdbLabel class="form-label" for="typeEmail">
+                      Email
+                    </label>
                   </mdb-form-control>
                   <div *ngIf="form.controls['email'].errors != null">
                     <small
@@ -66,16 +59,18 @@
                         form.controls['email'].errors!['required'] &&
                         form.controls['email'].touched
                       "
-                      >Debe ingresar su mail..</small
                     >
+                      Debe ingresar su mail.
+                    </small>
                     <small
                       class="invalid"
                       *ngIf="
                         form.controls['email'].errors!['email'] &&
                         form.controls['email'].touched
                       "
-                      >Ingrese un email valido</small
                     >
+                      Ingrese un email válido
+                    </small>
                   </div>
                   <p></p>
                   <mdb-form-control>
@@ -86,9 +81,9 @@
                       class="form-control"
                       formControlName="password"
                     />
-                    <label mdbLabel class="form-label" for="form2Example22"
-                      >Contraseña</label
-                    >
+                    <label mdbLabel class="form-label" for="form2Example22">
+                      Contraseña
+                    </label>
                   </mdb-form-control>
                   <div *ngIf="form.controls['password'].errors != null">
                     <small
@@ -97,8 +92,9 @@
                         form.controls['password'].errors!['required'] &&
                         form.controls['password'].touched
                       "
-                      >Debe ingresar su contraseña..</small
                     >
+                      Debe ingresar su contraseña.
+                    </small>
                   </div>
 
                   <p></p>

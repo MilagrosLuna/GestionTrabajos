@@ -28,9 +28,11 @@ export class LoginComponent {
       password: new FormControl('', [Validators.required]),
     });
   }
+
   goToRegister(): void {
     this.router.navigate(['/register']);
   }
+
   async verificarMails(user: any) {
     try {
       if (user.user.emailVerified) {
@@ -39,6 +41,7 @@ export class LoginComponent {
           'uid',
           user.user.uid
         );
+
         if (usuario.length > 0 && usuario[0].data.aprobado) {
           localStorage.setItem('logueado', user.user.uid);
           this.alerts.showSuccessMessageAndNavigate(
@@ -55,9 +58,10 @@ export class LoginComponent {
         this.alerts.showVerifyEmailMessage();
       }
     } catch (error: any) {
-      this.alerts.showErrorMessage(error.text);
+      this.alerts.showErrorMessage(error?.text || 'No se pudo validar la cuenta.');
     }
   }
+
   goToReset() {
     this.router.navigate(['/reset']);
   }
@@ -77,7 +81,7 @@ export class LoginComponent {
           case 'auth/too-many-requests':
           case 'auth/invalid-login-credentials':
           case 'auth/invalid-credential':
-            this.errorMessage = `Credenciales inválidas`;
+            this.errorMessage = 'Credenciales inválidas';
             break;
           default:
             this.errorMessage = error.message;
@@ -86,7 +90,7 @@ export class LoginComponent {
         this.alerts.showErrorMessage(this.errorMessage);
       }
     } else {
-      this.alerts.showErrorMessage('Error complete todos los datos!');
+      this.alerts.showErrorMessage('Error: complete todos los datos.');
     }
   }
 }

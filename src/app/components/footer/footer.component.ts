@@ -1,12 +1,13 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import emailjs, { EmailJSResponseStatus } from 'emailjs-com';
-import { SERVICE_ID, TEMPLATE_ID, USER_ID } from 'src/main';
+import { SERVICE_ID, TEMPLATE_ID, USER_ID } from 'src/app/constants/email.constants';
 import Swal from 'sweetalert2';
+
 @Component({
   selector: 'app-footer',
   templateUrl: './footer.component.html',
-  styleUrls: ['./footer.component.scss']
+  styleUrls: ['./footer.component.scss'],
 })
 export class FooterComponent {
   contactForm!: FormGroup;

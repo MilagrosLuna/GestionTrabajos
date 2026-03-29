@@ -1,5 +1,4 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
 import { ModalComprobanteComponent } from './modal-comprobante.component';
 
 describe('ModalComprobanteComponent', () => {
@@ -8,10 +7,17 @@ describe('ModalComprobanteComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [ModalComprobanteComponent]
+      declarations: [ModalComprobanteComponent],
     });
     fixture = TestBed.createComponent(ModalComprobanteComponent);
     component = fixture.componentInstance;
+    component.laburo = {
+      data: {
+        comprobanteSena: '',
+        comprobantePago: '',
+      },
+    };
+    component.pago = false;
     fixture.detectChanges();
   });
 

@@ -26,13 +26,10 @@ export class NavbarComponent implements OnDestroy, OnInit {
     this.authSubscription = this.authService
       .isUserAuthenticated()
       .subscribe((isLoggedIn) => {
-        if (isLoggedIn) {
-          this.logueado = true;
-        } else {
-          this.logueado = false;
-        }
+        this.logueado = isLoggedIn;
       });
   }
+
   ngOnInit(): void {
     this.verificar();
   }
@@ -46,9 +43,9 @@ export class NavbarComponent implements OnDestroy, OnInit {
   }
 
   async verificar() {
-    this.admins = await this.firebase.obtener('admins');  
-    let user = localStorage.getItem('logueado');
-    this.esAdmin = this.admins.some((admin) => admin.data.id === user);   
+    this.admins = await this.firebase.obtener('admins');
+    const uid = this.authService.getCurrentUid();
+    this.esAdmin = this.admins.some((admin) => admin.data.id === uid);
   }
 
   async logOut() {
@@ -57,7 +54,6 @@ export class NavbarComponent implements OnDestroy, OnInit {
       'Confirmar cierre de sesión'
     );
     if (result.isConfirmed) {
-      localStorage.removeItem('logueado');
       await this.authService.logout();
     }
   }

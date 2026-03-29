@@ -31,7 +31,7 @@ export class AltaClienteComponent {
     if (this.form.valid) {
       try {
         await this.cargarCliente();
-        this.alerts.showSuccessMessage('Cliente cargado correctamente', '');
+        this.alerts.showSuccessMessage('', 'Cliente cargado');
         this.form.reset();
       } catch (error: any) {
         this.alerts.showErrorMessage('Error al cargar el cliente: ' + error);
@@ -42,18 +42,7 @@ export class AltaClienteComponent {
   }
 
   async cargarCliente() {
-    const contadorSnap = await this.firebase.obtenrUno(
-      'contadores',
-      'clientes'
-    );
-    let contador = contadorSnap?.data['contador'];
-
-    contador++;
-
-    await this.firebase.modificar(
-      { id: 'clientes', data: { contador: contador } },
-      'contadores'
-    );
+    const contador = await this.firebase.incrementarContador('clientes');
 
     const nuevoCliente = new Cliente(
       contador,
@@ -68,7 +57,5 @@ export class AltaClienteComponent {
     await this.firebase.guardar(clienteObj, 'clientes');
 
     this.form.reset({});
-
-    this.alerts.showSuccessMessage('', 'Cliente cargado');
   }
 }

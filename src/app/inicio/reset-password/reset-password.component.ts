@@ -25,9 +25,11 @@ export class ResetPasswordComponent {
       email: new FormControl('', [Validators.required, Validators.email]),
     });
   }
+
   goBack(): void {
     this.router.navigate(['/login']);
   }
+
   async onSubmit() {
     if (this.form.valid) {
       let email = this.form.controls['email'].value;
@@ -35,14 +37,14 @@ export class ResetPasswordComponent {
         await this.authService.resetPassword(email);
         this.alerts.showSuccessMessageAndNavigate(
           ['/login'],
-          'siga los pasos para restablecer la contraseña',
+          'Siga los pasos para restablecer la contraseña.',
           'Email enviado'
         );
       } catch (error: any) {
         this.alerts.showErrorMessage(error.code);
       }
     } else {
-      this.alerts.showErrorMessage('Error complete todos los datos!');
+      this.alerts.showErrorMessage('Error: complete todos los datos.');
     }
   }
 }

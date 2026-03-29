@@ -1,17 +1,23 @@
 import { Injectable } from '@angular/core';
-import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
-import { storage } from 'src/main';
+import {
+  getDownloadURL,
+  getStorage,
+  ref,
+  uploadBytes,
+} from 'firebase/storage';
 
 @Injectable({
   providedIn: 'root',
 })
 export class StorageService {
+  private storage = getStorage();
+
   constructor() {}
 
   async guardarFoto2(dataUrl: string, ruta: string) {
     let hora = new Date().getTime();
-    let ubicacion = '/' + ruta + '/' + hora; 
-    const imgRef = ref(storage, ubicacion);
+    let ubicacion = '/' + ruta + '/' + hora;
+    const imgRef = ref(this.storage, ubicacion);
     const blob = this.dataURLtoBlob(dataUrl);
 
     return await uploadBytes(imgRef, blob).then(async () => {
@@ -23,12 +29,10 @@ export class StorageService {
 
   async guardarFoto(file: File, ruta: string) {
     let hora = new Date().getTime();
-    let ubicacion = '/' + ruta + '/' + hora; 
-    const imgRef = ref(storage, ubicacion);
+    let ubicacion = '/' + ruta + '/' + hora;
+    const imgRef = ref(this.storage, ubicacion);
 
-    // Carga el archivo a Firebase Storage
     await uploadBytes(imgRef, file);
-    // Obtiene la URL de descarga del archivo cargado
     const imgUrl = await getDownloadURL(imgRef);
     return imgUrl;
   }

@@ -4,7 +4,6 @@
       <div class="card-body p-md-5 mx-md-4">
         <h4 class="text-center mb-1 pb-1">Cargar Trabajo</h4>
         <form (ngSubmit)="onSubmit()" [formGroup]="form">
-          <!-- Client Search -->
           <div class="m-3">
             <input
               mdbCheckbox
@@ -28,28 +27,25 @@
                 formControlName="clienteName"
                 placeholder="Nombre del cliente"
               />
-              <label mdbLabel class="form-label" for="clienteName"
-                >Nombre</label
-              >
+              <label mdbLabel class="form-label" for="clienteName">
+                Nombre
+              </label>
             </mdb-form-control>
 
             <div *ngIf="form.controls['clienteName'].errors != null">
               <small
                 class="invalid"
                 *ngIf="
-                  form.controls['clienteName'].errors!['required'] &&
+                  (form.controls['clienteName'].errors!['required'] ||
+                    form.controls['clienteName'].errors!['whitespace']) &&
                   form.controls['clienteName'].touched
                 "
-                >Debe ingresar el nombre del cliente.</small
               >
-              <!-- <small
-                class="invalid"
-                *ngIf="form.controls['clienteName'].errors['whitespace'] && form.controls['clienteName'].touched"
-              >
-                El nombre no puede estar vacío.
-              </small> -->
+                Debe ingresar el nombre del cliente.
+              </small>
             </div>
           </div>
+
           <div *ngIf="!form.controls['esClienteAnonimo'].value">
             <div class="m-3">
               <button
@@ -66,6 +62,7 @@
               class="dropdown-menu show w-90 m-3"
             >
               <button
+                type="button"
                 class="dropdown-item"
                 *ngFor="let cliente of clientesFiltered"
                 (click)="selectCliente(cliente)"
@@ -111,8 +108,9 @@
                   form.controls['fecha'].errors!['required'] &&
                   form.controls['fecha'].touched
                 "
-                >Debe seleccionar una fecha.</small
               >
+                Debe seleccionar una fecha.
+              </small>
             </div>
           </div>
 
@@ -125,9 +123,9 @@
                 class="form-control"
                 formControlName="fechaEntrega"
               />
-              <label mdbLabel class="form-label" for="fechaEntrega"
-                >Fecha de entrega</label
-              >
+              <label mdbLabel class="form-label" for="fechaEntrega">
+                Fecha de entrega
+              </label>
             </mdb-form-control>
             <div *ngIf="form.controls['fechaEntrega'].errors != null">
               <small
@@ -136,8 +134,9 @@
                   form.controls['fechaEntrega'].errors!['required'] &&
                   form.controls['fechaEntrega'].touched
                 "
-                >Debe seleccionar una fecha.</small
               >
+                Debe seleccionar una fecha.
+              </small>
             </div>
           </div>
 
@@ -156,11 +155,13 @@
               <small
                 class="invalid"
                 *ngIf="
-                  form.controls['trabajo'].errors!['required'] &&
+                  (form.controls['trabajo'].errors!['required'] ||
+                    form.controls['trabajo'].errors!['whitespace']) &&
                   form.controls['trabajo'].touched
                 "
-                >Debe ingresar el trabajo a realizar.</small
               >
+                Debe ingresar el trabajo a realizar.
+              </small>
             </div>
           </div>
 
@@ -178,11 +179,13 @@
               <small
                 class="invalid"
                 *ngIf="
-                  form.controls['detalle'].errors!['required'] &&
+                  (form.controls['detalle'].errors!['required'] ||
+                    form.controls['detalle'].errors!['whitespace']) &&
                   form.controls['detalle'].touched
                 "
-                >Debe ingresar un detalle.</small
               >
+                Debe ingresar un detalle.
+              </small>
             </div>
           </div>
 
@@ -204,8 +207,9 @@
                   form.controls['precio'].errors!['required'] &&
                   form.controls['precio'].touched
                 "
-                >Debe ingresar un precio.</small
               >
+                Debe ingresar un precio.
+              </small>
             </div>
           </div>
 
@@ -214,21 +218,22 @@
               <input
                 mdbInput
                 type="number"
-                id="seña"
+                id="sena"
                 class="form-control"
-                formControlName="seña"
+                formControlName="sena"
               />
-              <label mdbLabel class="form-label" for="seña">Seña</label>
+              <label mdbLabel class="form-label" for="sena">Seña</label>
             </mdb-form-control>
-            <div *ngIf="form.controls['seña'].errors != null">
+            <div *ngIf="form.controls['sena'].errors != null">
               <small
                 class="invalid"
                 *ngIf="
-                  form.controls['seña'].errors!['required'] &&
-                  form.controls['seña'].touched
+                  form.controls['sena'].errors!['required'] &&
+                  form.controls['sena'].touched
                 "
-                >Debe ingresar una seña.</small
               >
+                Debe ingresar una seña.
+              </small>
             </div>
           </div>
 
@@ -240,6 +245,7 @@
                 class="form-control"
                 formControlName="caja"
               >
+                <option value="" disabled>Seleccione una opción</option>
                 <option value="efectivo">Efectivo</option>
                 <option value="transferencia">Transferencia</option>
               </select>
@@ -252,8 +258,9 @@
                   form.controls['caja'].errors!['required'] &&
                   form.controls['caja'].touched
                 "
-                >Debe seleccionar una opción.</small
               >
+                Debe seleccionar una opción.
+              </small>
             </div>
           </div>
 
@@ -268,6 +275,7 @@
                 id="cuentass"
                 formControlName="cuenta"
               >
+                <option value="" disabled>Seleccione una cuenta</option>
                 <option *ngFor="let cuenta of cuentas" [value]="cuenta.id">
                   {{ cuenta.data.nombre }}
                 </option>
@@ -324,8 +332,9 @@
             <button
               class="btn btn-primary btn-block fa-lg gradient-custom-2 mb-3"
               type="submit"
+              [disabled]="isSubmitting"
             >
-              cargar
+              {{ isSubmitting ? "Cargando..." : "Cargar" }}
             </button>
           </div>
         </form>

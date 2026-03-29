@@ -1,6 +1,12 @@
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { FormsModule } from '@angular/forms';
+import { MdbModalRef } from 'mdb-angular-ui-kit/modal';
 import { ModalComponent } from './modal.component';
+import { AlertsService } from 'src/app/servicesAndUtils/alerts.service';
+import { ConfirmationService } from 'src/app/servicesAndUtils/confirmation.service';
+import { FirebaseService } from 'src/app/servicesAndUtils/firebase.service';
+import { StorageService } from 'src/app/servicesAndUtils/storage.service';
 
 describe('ModalComponent', () => {
   let component: ModalComponent;
@@ -8,10 +14,64 @@ describe('ModalComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [ModalComponent]
+      imports: [FormsModule],
+      declarations: [ModalComponent],
+      providers: [
+        {
+          provide: MdbModalRef,
+          useValue: {
+            close: () => {},
+          },
+        },
+        {
+          provide: ConfirmationService,
+          useValue: {
+            setConfirmationState: () => {},
+          },
+        },
+        {
+          provide: FirebaseService,
+          useValue: {
+            obtener: () => Promise.resolve([]),
+            modificar: () => Promise.resolve(true),
+            guardar: () => Promise.resolve({}),
+          },
+        },
+        {
+          provide: AlertsService,
+          useValue: {
+            showErrorMessage: () => {},
+          },
+        },
+        {
+          provide: StorageService,
+          useValue: {
+            guardarFoto: () => Promise.resolve('url'),
+          },
+        },
+      ],
+      schemas: [NO_ERRORS_SCHEMA],
     });
     fixture = TestBed.createComponent(ModalComponent);
     component = fixture.componentInstance;
+    component.laburo = {
+      id: '1',
+      data: {
+        cliente: '',
+        fecha: '',
+        fechaEntrega: '',
+        trabajo: '',
+        detalle: '',
+        precio: 0,
+        sena: 0,
+        cajaSena: '',
+        pago: 0,
+        pagoEfectivo: 0,
+        cajaFinal: '',
+        cajaFinalEfectivo: '',
+        comentario: '',
+      },
+    };
     fixture.detectChanges();
   });
 

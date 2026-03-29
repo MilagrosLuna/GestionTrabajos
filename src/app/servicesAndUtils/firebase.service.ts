@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { initializeApp } from 'firebase/app';
+import { getApp, getApps, initializeApp } from 'firebase/app';
 import {
   Firestore,
   addDoc,
@@ -10,15 +10,15 @@ import {
   getDocs,
   getFirestore,
   query,
-  setDoc,
   updateDoc,
   where,
   orderBy,
   limit,
+  runTransaction,
   startAfter,
 } from 'firebase/firestore';
-
 import { environment } from 'src/environments/environment';
+
 const firebaseConfig = environment.firebaseConfig;
 
 @Injectable({
@@ -26,16 +26,19 @@ const firebaseConfig = environment.firebaseConfig;
 })
 export class FirebaseService {
   db: Firestore;
+
   constructor() {
-    this.db = getFirestore();
-    initializeApp(firebaseConfig);
+    const app =
+      getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+    this.db = getFirestore(app);
   }
+
   guardar(data: any, ruta: string) {
     const colRef = collection(this.db, ruta);
     return addDoc(colRef, data);
   }
 
-  async obtenrUno(ruta: string, uid: string) {
+  async obtenerUno(ruta: string, uid: string) {
     const docSnap = await getDoc(doc(this.db, ruta, uid));
     if (docSnap.exists()) {
       return {
@@ -59,15 +62,25 @@ export class FirebaseService {
     return array;
   }
 
-  async obtenerConPaginacion(ruta: string, ordenCampo: string, limite: number, ultimoDoc: any = null) {
+  async obtenerConPaginacion(
+    ruta: string,
+    ordenCampo: string,
+    limiteRegistros: number,
+    ultimoDoc: any = null
+  ) {
     let array: any[] = [];
     let q;
     const colRef = collection(this.db, ruta);
 
     if (ultimoDoc) {
-      q = query(colRef, orderBy(ordenCampo, 'desc'), startAfter(ultimoDoc), limit(limite));
+      q = query(
+        colRef,
+        orderBy(ordenCampo, 'desc'),
+        startAfter(ultimoDoc),
+        limit(limiteRegistros)
+      );
     } else {
-      q = query(colRef, orderBy(ordenCampo, 'desc'), limit(limite));
+      q = query(colRef, orderBy(ordenCampo, 'desc'), limit(limiteRegistros));
     }
 
     const querySnapshot = await getDocs(q);
@@ -78,7 +91,24 @@ export class FirebaseService {
       };
       array.push(data);
     });
-    return { data: array, ultimoDoc: querySnapshot.docs[querySnapshot.docs.length - 1] };
+
+    return {
+      data: array,
+      ultimoDoc: querySnapshot.docs[querySnapshot.docs.length - 1],
+    };
+  }
+
+  async incrementarContador(contadorId: string): Promise<number> {
+    const contadorRef = doc(this.db, 'contadores', contadorId);
+
+    return runTransaction(this.db, async (transaction) => {
+      const contadorSnap = await transaction.get(contadorRef);
+      const contadorActual = Number(contadorSnap.data()?.['contador']) || 0;
+      const siguienteContador = contadorActual + 1;
+
+      transaction.update(contadorRef, { contador: siguienteContador });
+      return siguienteContador;
+    });
   }
 
   async getWhere(path: string, condicion: string, condicion2: string) {
@@ -101,10 +131,10 @@ export class FirebaseService {
     const usuarioRef = collection(this.db, ruta);
     const documento = doc(usuarioRef, data.id);
     await updateDoc(documento, data.data)
-      .then((respuesta) => {
+      .then(() => {
         retorno = true;
       })
-      .catch((error) => {});
+      .catch(() => {});
     return retorno;
   }
 
@@ -128,10 +158,10 @@ export class FirebaseService {
     const usuarioRef = collection(this.db, ruta);
     const documento = doc(usuarioRef, data.id);
     await deleteDoc(documento)
-      .then((respuesta) => {
+      .then(() => {
         retorno = true;
       })
-      .catch((error) => {});
+      .catch(() => {});
     return retorno;
   }
 }

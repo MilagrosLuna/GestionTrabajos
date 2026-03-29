@@ -27,13 +27,15 @@ export class RegisterComponent {
       name: new FormControl('', [Validators.required]),
     });
   }
+
   goToLogin(): void {
     this.router.navigate(['/login']);
   }
+
   async onSubmit() {
     if (this.form.valid) {
       try {
-        let user = await this.authService.register(this.form.value);
+        await this.authService.register(this.form.value);
         this.alerts.showSuccessMessageAndNavigate(
           ['/login'],
           'Bienvenido a nuestro portal',
@@ -47,13 +49,13 @@ export class RegisterComponent {
               'Ya se encuentra un usuario registrado con ese email';
             break;
           default:
-            this.errorMessage = 'Hubo un problema al registrar!';
+            this.errorMessage = 'Hubo un problema al registrar.';
             break;
         }
         this.alerts.showErrorMessage(this.errorMessage);
       }
     } else {
-      this.alerts.showErrorMessage('Error complete todos los datos!');
+      this.alerts.showErrorMessage('Error: complete todos los datos.');
     }
   }
 }

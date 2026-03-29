@@ -95,7 +95,6 @@ export class ModalPagoComponent {
       return;
     }
     this.laburo = { ...this.laburoCopy };
-    this.confirmationService.emitAddPagoEvent();
 
     let bool = await this.firebase.modificar(this.laburo, 'laburos');
 
@@ -126,10 +125,9 @@ export class ModalPagoComponent {
       }
     }
 
+    this.confirmationService.emitAddPagoEvent();
     this.confirmationService.setConfirmationState(true);
     this.modalRef.close();
-
-    console.log(this.laburoCopy);
   }
 
   cancelar() {

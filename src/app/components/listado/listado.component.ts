@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { FirebaseService } from 'src/app/servicesAndUtils/firebase.service';
+import { AuthService } from 'src/app/servicesAndUtils/auth.service';
 import { ModalComponent } from '../modals/modal/modal.component';
 import { MdbModalService } from 'mdb-angular-ui-kit/modal';
 import { ConfirmationService } from 'src/app/servicesAndUtils/confirmation.service';
@@ -45,6 +46,7 @@ export class ListadoComponent {
   orderType: string = this.OrderType.Fecha;
   constructor(
     private firebase: FirebaseService,
+    private authService: AuthService,
     private modalService: MdbModalService,
     private confirmationService: ConfirmationService
   ) {}
@@ -108,6 +110,7 @@ export class ListadoComponent {
       this.transformLaburo(laburo)
     );
     this.ultimoDoc = result.ultimoDoc;
+    this.search();
     this.sortLaburos();
   }
 
@@ -150,8 +153,8 @@ export class ListadoComponent {
 
   async verificar() {
     this.admins = await this.firebase.obtener('admins');
-    let user = localStorage.getItem('logueado');
-    this.esAdmin = this.admins.some((admin) => admin.data.id === user);
+    const uid = this.authService.getCurrentUid();
+    this.esAdmin = this.admins.some((admin) => admin.data.id === uid);
   }
 
   getCuentaNameById(id: string): string {
@@ -227,16 +230,17 @@ export class ListadoComponent {
   }
 
   search() {
+    const baseLaburos = this.laburos.map((laburo) => this.transformLaburo(laburo));
+
     if (!this.searchTerm) {
-      this.filteredLaburos = this.laburos.map((laburo) =>
-        this.transformLaburo(laburo)
-      );
+      this.filteredLaburos = baseLaburos;
+      this.sortLaburos();
       return;
     }
 
     const term = this.searchTerm.toLowerCase();
 
-    this.filteredLaburos = this.filteredLaburos.filter((laburo) => {
+    this.filteredLaburos = baseLaburos.filter((laburo) => {
       const dataValues = Object.values(laburo.data || {})
         .filter(Boolean)
         .map((v: any) => v.toString().toLowerCase())
@@ -246,6 +250,8 @@ export class ListadoComponent {
 
       return dataValues.includes(term) || clienteValues.includes(term);
     });
+
+    this.sortLaburos();
   }
 
   modificar(laburo: any) {
