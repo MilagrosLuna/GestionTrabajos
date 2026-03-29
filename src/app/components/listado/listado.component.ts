@@ -173,6 +173,59 @@ export class ListadoComponent {
       .toLowerCase();
   }
 
+  private formatMoney(amount: number): string {
+    return new Intl.NumberFormat('es-AR', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    }).format(Number(amount) || 0);
+  }
+
+  private getMetodoPagoLabel(caja: string): string {
+    if (caja === 'efectivo') {
+      return 'Efectivo';
+    }
+
+    if (caja === 'transferencia') {
+      return 'Transferencia';
+    }
+
+    return 'No informado';
+  }
+
+  private getCuentaDetalle(cuentaId?: string, cuentaNombre?: string): string {
+    return (
+      cuentaNombre ||
+      (cuentaId ? this.getCuentaNameById(cuentaId) : '') ||
+      cuentaId ||
+      'No informada'
+    );
+  }
+
+  private buildPagoDetalle(
+    titulo: string,
+    monto: number,
+    caja: string,
+    cuentaId?: string,
+    cuentaNombre?: string
+  ): string[] {
+    if (!monto) {
+      return [];
+    }
+
+    const detalle = [
+      `${titulo}: $${this.formatMoney(monto)}`,
+      `Metodo de pago: ${this.getMetodoPagoLabel(caja)}`,
+    ];
+
+    if (caja === 'transferencia') {
+      detalle.push(
+        `Cuenta: ${this.getCuentaDetalle(cuentaId, cuentaNombre)}`
+      );
+    }
+
+    return detalle;
+  }
+
   search() {
     if (!this.searchTerm) {
       this.filteredLaburos = this.laburos.map((laburo) =>
@@ -186,7 +239,7 @@ export class ListadoComponent {
     this.filteredLaburos = this.filteredLaburos.filter((laburo) => {
       const dataValues = Object.values(laburo.data || {})
         .filter(Boolean)
-        .map((v:any) => v.toString().toLowerCase())
+        .map((v: any) => v.toString().toLowerCase())
         .join(' ');
 
       const clienteValues = this.getClienteSearchText(laburo.data?.clienteInfo);
@@ -273,9 +326,17 @@ export class ListadoComponent {
   async createPDF(laburo: any) {
     let laburoCopy = JSON.parse(JSON.stringify(laburo));
     let now = new Date();
-    let fechaEmision = `${now.getDate()}/${
+    let fechaEmision = `${now.getDate().toString().padStart(2, '0')}/${(
       now.getMonth() + 1
-    }/${now.getFullYear()} a las ${now.getHours()}:${now.getMinutes()} hs`;
+    )
+      .toString()
+      .padStart(2, '0')}/${now.getFullYear()} a las ${now
+      .getHours()
+      .toString()
+      .padStart(2, '0')}:${now
+      .getMinutes()
+      .toString()
+      .padStart(2, '0')} hs`;
 
     if (!laburoCopy.data.numero) {
       laburoCopy.data.numero = 0;
@@ -284,26 +345,55 @@ export class ListadoComponent {
       laburoCopy.data.comentario = '---';
     }
 
-    if (laburoCopy.data.clienteid) {
+    if (laburoCopy.data.clienteid && laburoCopy.data.clienteInfo?.nombre) {
       laburoCopy.data.cliente = laburoCopy.data.clienteInfo.nombre;
     }
-    console.log(laburo);
+
     const precioTotal = laburoCopy.data.precio || 0;
     const senia = laburoCopy.data.sena || 0;
-    const saldoPendiente = precioTotal - senia;
+    const pagoTransferencia = laburoCopy.data.pago || 0;
+    const pagoEfectivo = laburoCopy.data.pagoEfectivo || 0;
+    const totalAbonado = senia + pagoTransferencia + pagoEfectivo;
+    const saldoPendiente = Math.max(precioTotal - totalAbonado, 0);
     const estadoPago =
       saldoPendiente <= 0
         ? 'PAGADO EN SU TOTALIDAD'
-        : `Saldo pendiente: $${saldoPendiente}`;
+        : `Saldo pendiente: $${this.formatMoney(saldoPendiente)}`;
+
+    const detallePagos = [
+      ...this.buildPagoDetalle(
+        'Se\u00f1a',
+        senia,
+        laburoCopy.data.cajaSena,
+        laburoCopy.data.cuentaSena,
+        laburoCopy.data.cuentaNombreSena
+      ),
+      ...this.buildPagoDetalle(
+        'Pago final por transferencia',
+        pagoTransferencia,
+        laburoCopy.data.cajaFinal || 'transferencia',
+        laburoCopy.data.cuentaFinal,
+        laburoCopy.data.cuentaNombreFinal
+      ),
+      ...this.buildPagoDetalle(
+        'Pago final en efectivo',
+        pagoEfectivo,
+        laburoCopy.data.cajaFinalEfectivo || 'efectivo'
+      ),
+    ];
+
+    const detallePagosTexto = detallePagos.length
+      ? detallePagos.join('\n')
+      : 'Sin pagos registrados';
 
     const generarContenido = () => [
       {
-        text: `Orden de impresión laburo N°: ${laburoCopy.data.numero}`,
+        text: `Orden de impresi\u00f3n laburo N\u00b0: ${laburoCopy.data.numero}`,
         fontSize: 20,
         margin: [0, 5, 0, 0],
       },
       {
-        text: `Fecha de emisión: ${fechaEmision}`,
+        text: `Fecha de emisi\u00f3n: ${fechaEmision}`,
         fontSize: 16,
         margin: [0, 5, 0, 0],
       },
@@ -328,7 +418,14 @@ export class ListadoComponent {
         margin: [0, 8, 0, 0],
       },
       {
-        text: `Precio Total: $${precioTotal}\nSeña: $${senia}\n${estadoPago}`,
+        text: `Precio Total: $${this.formatMoney(
+          precioTotal
+        )}\nTotal abonado: $${this.formatMoney(totalAbonado)}\n${estadoPago}`,
+        fontSize: 16,
+        margin: [0, 8, 0, 0],
+      },
+      {
+        text: `Detalle de pagos:\n${detallePagosTexto}`,
         fontSize: 16,
         margin: [0, 8, 0, 0],
       },
@@ -344,9 +441,9 @@ export class ListadoComponent {
         ...generarContenido(),
         {
           text: [
-            'Las señas no se reembolsarán en caso de desistimiento del pedido, o si el trabajo ya está en proceso de impresión o armado.\n',
-            'En caso de no haberse realizado el diseño, se podrá devolver la seña descontando el costo correspondiente al diseño.\n',
-            'Las fechas de entrega son estimadas y pueden variar según la carga de trabajo u otros factores externos.\n',
+            'Las se\u00f1as no se reembolsar\u00e1n en caso de desistimiento del pedido, o si el trabajo ya est\u00e1 en proceso de impresi\u00f3n o armado.\n',
+            'En caso de no haberse realizado el dise\u00f1o, se podr\u00e1 devolver la se\u00f1a descontando el costo correspondiente al dise\u00f1o.\n',
+            'Las fechas de entrega son estimadas y pueden variar seg\u00fan la carga de trabajo u otros factores externos.\n',
           ],
           fontSize: 9,
           margin: [0, 20, 0, 10],
