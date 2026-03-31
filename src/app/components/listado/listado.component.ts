@@ -183,6 +183,48 @@ export class ListadoComponent {
     }).format(Number(amount) || 0);
   }
 
+  private formatDisplayDate(dateValue: unknown): string {
+    if (!dateValue) {
+      return 'No informada';
+    }
+
+    if (typeof dateValue === 'string') {
+      const match = dateValue.match(/^(\d{4})-(\d{2})-(\d{2})/);
+
+      if (match) {
+        const [, year, month, day] = match;
+        return `${day}/${month}/${year}`;
+      }
+    }
+
+    const rawDate = dateValue as
+      | Date
+      | { toDate?: () => Date; seconds?: number }
+      | string
+      | number;
+
+    let parsedDate: Date;
+
+    if (rawDate instanceof Date) {
+      parsedDate = rawDate;
+    } else if (typeof rawDate === 'object' && typeof rawDate?.toDate === 'function') {
+      parsedDate = rawDate.toDate();
+    } else if (typeof rawDate === 'object' && typeof rawDate?.seconds === 'number') {
+      parsedDate = new Date(rawDate.seconds * 1000);
+    } else if (typeof rawDate === 'string' || typeof rawDate === 'number') {
+      parsedDate = new Date(rawDate);
+    } else {
+      return String(dateValue);
+    }
+
+    if (Number.isNaN(parsedDate.getTime())) {
+      return String(dateValue);
+    }
+
+    const [year, month, day] = parsedDate.toISOString().slice(0, 10).split('-');
+    return `${day}/${month}/${year}`;
+  }
+
   private getMetodoPagoLabel(caja: string): string {
     if (caja === 'efectivo') {
       return 'Efectivo';
@@ -391,6 +433,10 @@ export class ListadoComponent {
     const detallePagosTexto = detallePagos.length
       ? detallePagos.join('\n')
       : 'Sin pagos registrados';
+    const fechaLaburoTexto = this.formatDisplayDate(laburoCopy.data.fecha);
+    const fechaEntregaTexto = this.formatDisplayDate(
+      laburoCopy.data.fechaEntrega
+    );
 
     const generarContenido = () => [
       {
@@ -419,7 +465,7 @@ export class ListadoComponent {
         margin: [0, 8, 0, 0],
       },
       {
-        text: `Fecha: ${laburoCopy.data.fecha}\nFecha de Entrega: ${laburoCopy.data.fechaEntrega} `,
+        text: `Fecha: ${fechaLaburoTexto}\nFecha de Entrega: ${fechaEntregaTexto} `,
         fontSize: 16,
         margin: [0, 8, 0, 0],
       },
