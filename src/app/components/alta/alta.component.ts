@@ -10,6 +10,7 @@ import { Observable } from 'rxjs';
 import { Laburo } from 'src/app/clases/laburo';
 import { Movimiento } from 'src/app/clases/movimiento';
 import { AlertsService } from 'src/app/servicesAndUtils/alerts.service';
+import { AuditoriaService } from 'src/app/servicesAndUtils/auditoria.service';
 import { FirebaseService } from 'src/app/servicesAndUtils/firebase.service';
 import { StorageService } from 'src/app/servicesAndUtils/storage.service';
 
@@ -18,6 +19,17 @@ export function noWhitespaceValidator(
 ): ValidationErrors | null {
   const value = (control.value ?? '').toString();
   return value.trim().length ? null : { whitespace: true };
+}
+
+export function fechaEntregaValidator(
+  group: AbstractControl
+): ValidationErrors | null {
+  const fecha = group.get('fecha')?.value;
+  const fechaEntrega = group.get('fechaEntrega')?.value;
+  if (fecha && fechaEntrega && fechaEntrega < fecha) {
+    return { fechaEntregaAnterior: true };
+  }
+  return null;
 }
 
 type AltaFormValue = {
@@ -54,7 +66,8 @@ export class AltaComponent {
   constructor(
     private firebase: FirebaseService,
     private alerts: AlertsService,
-    private storageService: StorageService
+    private storageService: StorageService,
+    private auditoria: AuditoriaService
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -91,7 +104,7 @@ export class AltaComponent {
       cuenta: new FormControl(''),
       comprobante: new FormControl(''),
       nuevaCuenta: new FormControl(''),
-    });
+    }, { validators: fechaEntregaValidator });
 
     this.form.controls['esClienteAnonimo'].valueChanges.subscribe((value) => {
       if (value) {
@@ -101,9 +114,13 @@ export class AltaComponent {
         ]);
         this.form.controls['cliente'].clearValidators();
         this.form.controls['cliente'].setValue('');
+        this.selectedClienteInfo = '';
+        this.clientesFiltered = [];
       } else {
         this.form.controls['clienteName'].clearValidators();
+        this.form.controls['clienteName'].setValue('');
         this.form.controls['cliente'].setValidators([Validators.required]);
+        this.clientesFiltered = [];
       }
 
       this.form.controls['clienteName'].updateValueAndValidity();
@@ -228,7 +245,11 @@ export class AltaComponent {
     this.form.updateValueAndValidity();
 
     if (!this.form.valid) {
-      this.alerts.showErrorMessage('Complete todos los datos');
+      if (this.form.errors?.['fechaEntregaAnterior']) {
+        this.alerts.showErrorMessage('La fecha de entrega no puede ser anterior a la fecha de inicio.');
+      } else {
+        this.alerts.showErrorMessage('Complete todos los datos');
+      }
       return;
     }
 
@@ -351,6 +372,29 @@ export class AltaComponent {
     const laburoObj = JSON.parse(JSON.stringify(laburo));
     const id = await this.firebase.guardar(laburoObj, 'laburos');
 
+    const senaDesc = sena > 0 && sena < precio ? ` – Seña: $${sena}` : '';
+    await this.auditoria.registrar({
+      accion: 'alta',
+      entidad: 'laburo',
+      entidadId: id.id,
+      descripcion: `Creó trabajo N°${laburo.numero} – ${laburo.cliente || clienteTextoMovimiento}${senaDesc}`,
+      datoNuevo: laburoObj,
+    });
+
+    if (sena > 0 && sena < precio) {
+      await this.auditoria.registrar({
+        accion: 'seña',
+        entidad: 'laburo',
+        entidadId: id.id,
+        descripcion: `Seña de $${sena} en trabajo N°${laburo.numero} – ${formValue.caja}`,
+        datoNuevo: {
+          sena,
+          cajaSena: formValue.caja,
+          ...(formValue.cuenta ? { cuentaSena: formValue.cuenta } : {}),
+        },
+      });
+    }
+
     const ahora = new Date();
     const movimiento = new Movimiento();
     movimiento.detalle =
@@ -402,10 +446,17 @@ export class AltaComponent {
   }
 
   onSelectFile(event: any) {
-    const file =
-      event.target.files && event.target.files[0]
-        ? event.target.files[0]
-        : null;
+    const file: File | null = event.target.files?.[0] ?? null;
+    if (!file) return;
+
+    try {
+      this.storageService.validateFile(file);
+    } catch (err: any) {
+      this.alerts.showErrorMessage(err.message);
+      event.target.value = '';
+      return;
+    }
+
     this.url = file;
     this.form.controls['comprobante'].setValue(file);
     this.form.controls['comprobante'].updateValueAndValidity();

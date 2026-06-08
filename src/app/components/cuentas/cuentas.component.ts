@@ -10,6 +10,8 @@ export class CuentasComponent {
   cuentas: any[] = [];
   cuentasfiltrasdas: any[] = [];
   searchTerm: string = '';
+  cargandoAprobacion: string | null = null;
+
   constructor(private firebase: FirebaseService) {}
 
   async ngOnInit(): Promise<void> {
@@ -19,13 +21,20 @@ export class CuentasComponent {
   private async initializeData(): Promise<void> {
     this.cuentas = await this.firebase.obtener('usuarios');
     this.cuentasfiltrasdas = [...this.cuentas];
-    console.log(this.cuentas);
   }
 
   async cambiarEstadoAprobacion(cuenta: any) {
-    cuenta.data.aprobado = !cuenta.data.aprobado;
-    await this.firebase.modificar(cuenta, 'usuarios');
-    await this.initializeData();
+    if (this.cargandoAprobacion === cuenta.id) return;
+    this.cargandoAprobacion = cuenta.id;
+    try {
+      cuenta.data.aprobado = !cuenta.data.aprobado;
+      await this.firebase.modificar(cuenta, 'usuarios');
+      await this.initializeData();
+    } catch {
+      cuenta.data.aprobado = !cuenta.data.aprobado;
+    } finally {
+      this.cargandoAprobacion = null;
+    }
   }
   
   search() {

@@ -5,7 +5,7 @@ import { of } from 'rxjs';
 import { NavbarComponent } from './navbar.component';
 import { AuthService } from 'src/app/servicesAndUtils/auth.service';
 import { AlertsService } from 'src/app/servicesAndUtils/alerts.service';
-import { FirebaseService } from 'src/app/servicesAndUtils/firebase.service';
+import { AdminService } from 'src/app/servicesAndUtils/admin.service';
 
 describe('NavbarComponent', () => {
   let component: NavbarComponent;
@@ -30,9 +30,11 @@ describe('NavbarComponent', () => {
           },
         },
         {
-          provide: FirebaseService,
+          provide: AdminService,
           useValue: {
-            obtener: () => Promise.resolve([]),
+            getEsAdmin: () => of(false),
+            inicializar: () => Promise.resolve(),
+            reset: () => {},
           },
         },
       ],

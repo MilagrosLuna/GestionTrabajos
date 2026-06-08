@@ -1,0 +1,33 @@
+.card {
+  max-width: 700px;
+  margin: 0 auto;
+  border: 1px solid rgba(201, 168, 76, 0.1) !important;
+
+  .card-body { padding: 2rem 2.5rem !important; }
+
+  h4.text-center {
+    font-weight: 700;
+    color: var(--ph-black, #0A0A0A);
+    font-size: 1.4rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+    padding-bottom: 0.75rem;
+
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 56px;
+      height: 3px;
+      background: linear-gradient(90deg, var(--ph-gold-dark, #9A7A1A), var(--ph-gold, #C9A84C), var(--ph-copper, #C17D3C));
+      border-radius: 2px;
+    }
+  }
+}
+
+.form-check-input:checked {
+  background-color: var(--ph-gold, #C9A84C) !important;
+  border-color: var(--ph-gold-dark, #9A7A1A) !important;
+}

@@ -1,8 +1,75 @@
+.card-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--ph-black, #0A0A0A);
+  border-bottom: 1px solid rgba(201, 168, 76, 0.2);
+  padding-bottom: 0.5rem;
+  margin-bottom: 0.6rem;
+
+  p { margin-bottom: 3px; }
+}
+
+.card-text p {
+  font-size: 14px;
+  line-height: 1.6;
+  margin-bottom: 4px !important;
+  color: #3a3a3a;
+}
+
+// Gremio badge via global text-success / text-muted
+.card-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: auto;
+  padding-top: 10px;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+
+  .btn-sm {
+    padding: 5px 10px;
+    font-size: 0.78rem;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.15s ease;
+  }
+
+  .btn-action-edit {
+    background: linear-gradient(135deg, var(--ph-gold-dark, #9A7A1A), var(--ph-gold, #C9A84C));
+    color: var(--ph-black, #0A0A0A);
+    border: none;
+    &:hover { box-shadow: 0 2px 8px rgba(201, 168, 76, 0.5); }
+  }
+
+  .btn-action-jobs {
+    background: rgba(41, 128, 185, 0.12);
+    color: var(--ph-transfer, #2980b9);
+    border: 1px solid rgba(41, 128, 185, 0.3);
+    &:hover { background: var(--ph-transfer); color: #fff; }
+  }
+}
 
 .fixed-bottom-left {
-    position: fixed;
-    bottom: 20px;
-    left: 20px;
-    z-index: 1000; 
+  position: fixed;
+  bottom: 24px;
+  left: 24px;
+  z-index: 1000;
+  width: 48px;
+  height: 48px;
+  border-radius: 50% !important;
+  font-size: 1.3rem;
+  font-weight: 300;
+  background: linear-gradient(135deg, var(--ph-gold-dark, #9A7A1A), var(--ph-gold, #C9A84C)) !important;
+  border: none !important;
+  color: var(--ph-black, #0A0A0A) !important;
+  box-shadow: 0 4px 18px rgba(201, 168, 76, 0.45) !important;
+
+  &:hover {
+    box-shadow: 0 6px 24px rgba(201, 168, 76, 0.6) !important;
+    transform: scale(1.08);
   }
-  
+}

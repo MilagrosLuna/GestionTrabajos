@@ -6,7 +6,7 @@ import { MdbModalService } from 'mdb-angular-ui-kit/modal';
 import { FiltroLaburosClientesComponent } from './filtro-laburos-clientes.component';
 import { FirebaseService } from 'src/app/servicesAndUtils/firebase.service';
 import { ConfirmationService } from 'src/app/servicesAndUtils/confirmation.service';
-import { AuthService } from 'src/app/servicesAndUtils/auth.service';
+import { AdminService } from 'src/app/servicesAndUtils/admin.service';
 
 describe('FiltroLaburosClientesComponent', () => {
   let component: FiltroLaburosClientesComponent;
@@ -47,9 +47,9 @@ describe('FiltroLaburosClientesComponent', () => {
           },
         },
         {
-          provide: AuthService,
+          provide: AdminService,
           useValue: {
-            getCurrentUid: () => 'admin-1',
+            getEsAdmin: () => of(false),
           },
         },
       ],

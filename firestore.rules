@@ -3,17 +3,78 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // This rule allows anyone with your Firestore database reference to view, edit,
-    // and delete all data in your Firestore database. It is useful for getting
-    // started, but it is configured to expire after 30 days because it
-    // leaves your app open to attackers. At that time, all client
-    // requests to your Firestore database will be denied.
-    //
-    // Make sure to write security rules for your app before that time, or else
-    // all client requests to your Firestore database will be denied until you Update
-    // your rules
-    match /{document=**} {
-      allow read, write: if request.time < timestamp.date(2030, 12, 28);
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    // Solo usuarios con aprobado == true pueden operar
+    function isApproved() {
+      return isAuthenticated() &&
+        exists(/databases/$(database)/documents/usuarios/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.get('aprobado', false) == true;
+    }
+
+    // usuarios: lectura abierta a autenticados (necesario antes de la aprobacion en login)
+    match /usuarios/{userId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && request.auth.uid == userId;
+      // Solo admins pueden cambiar el campo aprobado; usuarios pueden editar sus propios datos pero no el campo aprobado
+      allow update: if isAdmin() ||
+        (request.auth.uid == userId && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['aprobado']));
+      allow delete: if isAdmin();
+    }
+
+    match /admins/{adminId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    match /laburos/{docId} {
+      allow read, create, update: if isApproved();
+      allow delete: if isAdmin();
+    }
+
+    match /laburosArchivo/{docId} {
+      allow read, create: if isApproved();
+      allow update, delete: if isAdmin();
+    }
+
+    match /clientes/{docId} {
+      allow read, create, update: if isApproved();
+      allow delete: if isAdmin();
+    }
+
+    match /cuentas/{docId} {
+      allow read: if isApproved();
+      allow write: if isAdmin();
+    }
+
+    // movimientos son inmutables: nadie puede modificar ni borrar un pago registrado
+    match /movimientos/{docId} {
+      allow read: if isApproved();
+      allow create: if isApproved();
+      allow update, delete: if false;
+    }
+
+    match /presupuestos/{docId} {
+      allow read, create, update: if isApproved();
+      allow delete: if isAdmin();
+    }
+
+    match /contadores/{docId} {
+      allow read, write: if isApproved();
+    }
+
+    // auditorias son inmutables: solo lectura y creacion
+    match /auditorias/{docId} {
+      allow read: if isApproved();
+      allow create: if isApproved();
+      allow update, delete: if false;
     }
   }
 }

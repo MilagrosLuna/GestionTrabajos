@@ -1,10 +1,54 @@
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ReactiveFormsModule } from '@angular/forms';
-import { AltaComponent } from './alta.component';
+import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { AltaComponent, noWhitespaceValidator, fechaEntregaValidator } from './alta.component';
 import { FirebaseService } from 'src/app/servicesAndUtils/firebase.service';
 import { AlertsService } from 'src/app/servicesAndUtils/alerts.service';
 import { StorageService } from 'src/app/servicesAndUtils/storage.service';
+import { AuditoriaService } from 'src/app/servicesAndUtils/auditoria.service';
+
+describe('noWhitespaceValidator', () => {
+  it('rechaza cadena vacía', () => {
+    expect(noWhitespaceValidator(new FormControl(''))).toEqual({ whitespace: true });
+  });
+
+  it('rechaza cadena solo espacios', () => {
+    expect(noWhitespaceValidator(new FormControl('   '))).toEqual({ whitespace: true });
+  });
+
+  it('acepta cadena con contenido', () => {
+    expect(noWhitespaceValidator(new FormControl('texto'))).toBeNull();
+  });
+
+  it('acepta cadena con espacios y contenido', () => {
+    expect(noWhitespaceValidator(new FormControl('  texto  '))).toBeNull();
+  });
+});
+
+describe('fechaEntregaValidator', () => {
+  function grupo(fecha: string, fechaEntrega: string) {
+    return new FormGroup({
+      fecha: new FormControl(fecha),
+      fechaEntrega: new FormControl(fechaEntrega),
+    });
+  }
+
+  it('es válido cuando fechaEntrega es posterior', () => {
+    expect(fechaEntregaValidator(grupo('2024-01-10', '2024-01-15'))).toBeNull();
+  });
+
+  it('es válido cuando fechaEntrega es igual a fecha', () => {
+    expect(fechaEntregaValidator(grupo('2024-01-10', '2024-01-10'))).toBeNull();
+  });
+
+  it('es inválido cuando fechaEntrega es anterior', () => {
+    expect(fechaEntregaValidator(grupo('2024-01-15', '2024-01-10'))).toEqual({ fechaEntregaAnterior: true });
+  });
+
+  it('es válido cuando falta alguna fecha', () => {
+    expect(fechaEntregaValidator(grupo('', '2024-01-10'))).toBeNull();
+  });
+});
 
 describe('AltaComponent', () => {
   let component: AltaComponent;
@@ -39,6 +83,7 @@ describe('AltaComponent', () => {
         { provide: FirebaseService, useValue: firebaseSpy },
         { provide: AlertsService, useValue: alertsSpy },
         { provide: StorageService, useValue: storageSpy },
+        { provide: AuditoriaService, useValue: { registrar: () => Promise.resolve() } },
       ],
       schemas: [NO_ERRORS_SCHEMA],
     });

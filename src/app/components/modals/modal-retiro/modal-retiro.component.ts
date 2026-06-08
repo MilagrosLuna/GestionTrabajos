@@ -3,6 +3,7 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MdbModalRef } from 'mdb-angular-ui-kit/modal';
 import { Movimiento } from 'src/app/clases/movimiento';
 import { AlertsService } from 'src/app/servicesAndUtils/alerts.service';
+import { AuditoriaService } from 'src/app/servicesAndUtils/auditoria.service';
 import { ConfirmationService } from 'src/app/servicesAndUtils/confirmation.service';
 import { FirebaseService } from 'src/app/servicesAndUtils/firebase.service';
 @Component({
@@ -17,7 +18,8 @@ export class ModalRetiroComponent {
     public modalRef: MdbModalRef<ModalRetiroComponent>,
     private confirmationService: ConfirmationService,
     private firebase: FirebaseService,
-    private alerts: AlertsService
+    private alerts: AlertsService,
+    private auditoria: AuditoriaService
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -58,10 +60,16 @@ export class ModalRetiroComponent {
         return;
       }
 
-      console.log(movimiento);
       if (movimiento.monto > 0) {
         let movimientoObj = JSON.parse(JSON.stringify(movimiento));
-        await this.firebase.guardar(movimientoObj, 'movimientos');
+        const docRef = await this.firebase.guardar(movimientoObj, 'movimientos');
+        await this.auditoria.registrar({
+          accion: 'retiro',
+          entidad: 'movimiento',
+          entidadId: docRef.id,
+          descripcion: `Retiro de caja: $${movimiento.monto} – ${movimiento.detalle}`,
+          datoNuevo: { monto: movimiento.monto, detalle: movimiento.detalle, fecha: movimiento.fecha },
+        });
       }
       this.confirmationService.setConfirmationState(true);
       this.confirmationService.emitRetiroEvent();

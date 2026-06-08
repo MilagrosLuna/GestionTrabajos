@@ -2,9 +2,10 @@ import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { RouterTestingModule } from '@angular/router/testing';
+import { of } from 'rxjs';
 import { ListadoClientesComponent } from './listado-clientes.component';
 import { FirebaseService } from 'src/app/servicesAndUtils/firebase.service';
-import { AuthService } from 'src/app/servicesAndUtils/auth.service';
+import { AdminService } from 'src/app/servicesAndUtils/admin.service';
 
 describe('ListadoClientesComponent', () => {
   let component: ListadoClientesComponent;
@@ -24,9 +25,9 @@ describe('ListadoClientesComponent', () => {
           },
         },
         {
-          provide: AuthService,
+          provide: AdminService,
           useValue: {
-            getCurrentUid: () => 'admin-1',
+            getEsAdmin: () => of(false),
           },
         },
       ],

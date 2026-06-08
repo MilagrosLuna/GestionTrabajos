@@ -1,0 +1,166 @@
+<div class="container py-4">
+  <h4 class="mb-4">Auditoría del sistema</h4>
+
+  <!-- Filtros -->
+  <div class="card mb-3 p-3">
+    <div class="row g-2 align-items-end">
+      <div class="col-12 col-md-4">
+        <label class="form-label small fw-semibold">Buscar</label>
+        <input
+          type="text"
+          class="form-control form-control-sm"
+          placeholder="Usuario, descripción, ID..."
+          [(ngModel)]="busqueda"
+          aria-label="Buscar en auditoría"
+        />
+      </div>
+      <div class="col-6 col-md-3">
+        <label class="form-label small fw-semibold">Acción</label>
+        <select class="form-select form-select-sm" [(ngModel)]="filtroAccion" aria-label="Filtrar por acción">
+          <option *ngFor="let a of ACCIONES" [value]="a.value">{{ a.label }}</option>
+        </select>
+      </div>
+      <div class="col-6 col-md-3">
+        <label class="form-label small fw-semibold">Entidad</label>
+        <select class="form-select form-select-sm" [(ngModel)]="filtroEntidad" aria-label="Filtrar por entidad">
+          <option *ngFor="let e of ENTIDADES" [value]="e.value">{{ e.label }}</option>
+        </select>
+      </div>
+      <div class="col-12 col-md-2">
+        <button class="btn btn-sm btn-outline-secondary w-100" (click)="cargar()">
+          Recargar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loader -->
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+  </div>
+
+  <!-- Sin resultados -->
+  <div *ngIf="!loading && entradasFiltradas.length === 0" class="text-muted text-center py-4">
+    No hay registros de auditoría.
+  </div>
+
+  <!-- Tabla -->
+  <div *ngIf="!loading && entradasFiltradas.length > 0" class="table-responsive">
+    <table class="table table-sm table-hover align-middle">
+      <thead class="table-light">
+        <tr>
+          <th scope="col" style="width:2rem;"></th>
+          <th scope="col">Fecha / Hora</th>
+          <th scope="col">Usuario</th>
+          <th scope="col">Acción</th>
+          <th scope="col">Entidad</th>
+          <th scope="col">Descripción</th>
+          <th scope="col">ID</th>
+        </tr>
+      </thead>
+      <tbody>
+        <ng-container *ngFor="let e of entradasFiltradas">
+          <tr [class.row-expanded]="expandedId === e.id">
+            <td>
+              <button
+                *ngIf="tieneDetalle(e)"
+                class="btn btn-link btn-sm p-0 toggle-btn"
+                (click)="toggleDetalle(e.id)"
+                [title]="expandedId === e.id ? 'Ocultar detalle' : 'Ver detalle'"
+                [attr.aria-expanded]="expandedId === e.id"
+              >
+                {{ expandedId === e.id ? '▼' : '▶' }}
+              </button>
+            </td>
+            <td class="text-nowrap small">{{ formatTimestamp(e.data.timestamp) }}</td>
+            <td class="small">{{ e.data.nombreUsuario }}</td>
+            <td>
+              <span [ngClass]="badgeAccion(e.data.accion)">
+                {{ labelAccion(e.data.accion) }}
+              </span>
+            </td>
+            <td class="small text-capitalize">{{ e.data.entidad }}</td>
+            <td class="small">{{ e.data.descripcion }}</td>
+            <td class="small text-muted font-monospace" style="font-size: 0.7rem;">
+              {{ e.data.entidadId | slice:0:8 }}…
+            </td>
+          </tr>
+
+          <!-- Fila de detalle expandible -->
+          <tr *ngIf="expandedId === e.id" class="detail-row">
+            <td colspan="7" class="detail-cell">
+
+              <!-- Diff: anterior y nuevo -->
+              <ng-container *ngIf="e.data.datoAnterior && e.data.datoNuevo; else soloUno">
+                <div class="detail-section">
+                  <p class="detail-title mb-2">Cambios registrados</p>
+                  <ng-container *ngIf="getCambios(e.data.datoAnterior, e.data.datoNuevo) as cambios">
+                    <p *ngIf="cambios.length === 0" class="text-muted small mb-0">Sin cambios de campos detectados.</p>
+                    <table *ngIf="cambios.length > 0" class="table table-xs mb-0">
+                      <thead>
+                        <tr>
+                          <th>Campo</th>
+                          <th>Antes</th>
+                          <th>Después</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr *ngFor="let c of cambios">
+                          <td class="fw-semibold">{{ c.label }}</td>
+                          <td class="val-antes">{{ c.antes }}</td>
+                          <td class="val-despues">{{ c.despues }}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </ng-container>
+                </div>
+              </ng-container>
+
+              <ng-template #soloUno>
+                <!-- Solo datoNuevo -->
+                <ng-container *ngIf="e.data.datoNuevo && !e.data.datoAnterior">
+                  <div class="detail-section">
+                    <p class="detail-title mb-2">Datos registrados</p>
+                    <table class="table table-xs mb-0">
+                      <tbody>
+                        <tr *ngFor="let c of getCampos(e.data.datoNuevo)">
+                          <td class="fw-semibold" style="width:40%">{{ c.label }}</td>
+                          <td>{{ c.valor }}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </ng-container>
+
+                <!-- Solo datoAnterior -->
+                <ng-container *ngIf="e.data.datoAnterior && !e.data.datoNuevo">
+                  <div class="detail-section">
+                    <p class="detail-title mb-2">Datos eliminados</p>
+                    <table class="table table-xs mb-0">
+                      <tbody>
+                        <tr *ngFor="let c of getCampos(e.data.datoAnterior)">
+                          <td class="fw-semibold" style="width:40%">{{ c.label }}</td>
+                          <td class="val-antes">{{ c.valor }}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </ng-container>
+              </ng-template>
+
+            </td>
+          </tr>
+        </ng-container>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Cargar más -->
+  <div class="text-center mt-3" *ngIf="hayMas && !loading && entradas.length > 0">
+    <button class="btn btn-outline-secondary btn-sm" (click)="cargarMas()">
+      Cargar más
+    </button>
+  </div>
+</div>

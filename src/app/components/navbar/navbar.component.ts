@@ -1,59 +1,57 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { AdminService } from 'src/app/servicesAndUtils/admin.service';
 import { AlertsService } from 'src/app/servicesAndUtils/alerts.service';
 import { AuthService } from 'src/app/servicesAndUtils/auth.service';
-import { FirebaseService } from 'src/app/servicesAndUtils/firebase.service';
 
 @Component({
   selector: 'app-navbar',
   templateUrl: './navbar.component.html',
   styleUrls: ['./navbar.component.scss'],
 })
-export class NavbarComponent implements OnDestroy, OnInit {
-  logueado: boolean = false;
-  admins: any[] = [];
-  esAdmin: boolean = false;
-  private authSubscription: Subscription;
+export class NavbarComponent implements OnInit, OnDestroy {
+  logueado = false;
+  esAdmin = false;
+  private subs = new Subscription();
 
   constructor(
     private router: Router,
     private authService: AuthService,
-    private alerts: AlertsService,
-    private firebase: FirebaseService
-  ) {
-    this.verificar();
-    this.authSubscription = this.authService
-      .isUserAuthenticated()
-      .subscribe((isLoggedIn) => {
-        this.logueado = isLoggedIn;
-      });
-  }
+    private adminService: AdminService,
+    private alerts: AlertsService
+  ) {}
 
   ngOnInit(): void {
-    this.verificar();
+    this.subs.add(
+      this.authService.isUserAuthenticated().subscribe(async (isLoggedIn) => {
+        this.logueado = isLoggedIn;
+        if (isLoggedIn) {
+          await this.adminService.inicializar();
+        }
+      })
+    );
+
+    this.subs.add(
+      this.adminService.getEsAdmin().subscribe((v) => (this.esAdmin = v))
+    );
   }
 
   ngOnDestroy(): void {
-    this.authSubscription.unsubscribe();
+    this.subs.unsubscribe();
   }
 
   goTo(ruta: string) {
     this.router.navigate(['/' + ruta]);
   }
 
-  async verificar() {
-    this.admins = await this.firebase.obtener('admins');
-    const uid = this.authService.getCurrentUid();
-    this.esAdmin = this.admins.some((admin) => admin.data.id === uid);
-  }
-
   async logOut() {
     const result = await this.alerts.showConfirmationMessage(
-      '¿Estás seguro de que quieres cerrar la sesión?',
+      '¿Estás seguro de que querés cerrar la sesión?',
       'Confirmar cierre de sesión'
     );
     if (result.isConfirmed) {
+      this.adminService.reset();
       await this.authService.logout();
     }
   }

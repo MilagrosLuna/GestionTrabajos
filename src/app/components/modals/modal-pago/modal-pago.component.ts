@@ -2,6 +2,7 @@ import { Component, Input } from '@angular/core';
 import { MdbModalRef } from 'mdb-angular-ui-kit/modal';
 import { Movimiento } from 'src/app/clases/movimiento';
 import { AlertsService } from 'src/app/servicesAndUtils/alerts.service';
+import { AuditoriaService } from 'src/app/servicesAndUtils/auditoria.service';
 import { ConfirmationService } from 'src/app/servicesAndUtils/confirmation.service';
 import { FirebaseService } from 'src/app/servicesAndUtils/firebase.service';
 import { StorageService } from 'src/app/servicesAndUtils/storage.service';
@@ -26,20 +27,24 @@ export class ModalPagoComponent {
     private confirmationService: ConfirmationService,
     private firebase: FirebaseService,
     private alerts: AlertsService,
-    private storageService: StorageService
+    private storageService: StorageService,
+    private auditoria: AuditoriaService
   ) {}
 
   async ngOnInit(): Promise<void> {
     this.originalLaburo = JSON.parse(JSON.stringify(this.laburo));
     this.laburoCopy = JSON.parse(JSON.stringify(this.laburo));
     this.cuentas = await this.firebase.obtener('cuentas');
-    this.valorRestante = this.laburoCopy.data.precio - this.laburo.data.sena;
+    const precio = this.laburoCopy.data.precio || 0;
+    const sena = this.laburoCopy.data.sena || 0;
+    const pagoExistente = this.laburoCopy.data.pago || 0;
+    const pagoEfectivoExistente = this.laburoCopy.data.pagoEfectivo || 0;
+    this.valorRestante = Math.max(precio - sena - pagoExistente - pagoEfectivoExistente, 0);
   }
 
   onSelectFile(event: any) {
     if (event.target.files && event.target.files[0]) {
       this.url = event.target.files[0];
-      this.laburoCopy.data.comprobantePago = this.url;
     }
   }
 
@@ -72,7 +77,7 @@ export class ModalPagoComponent {
       if (this.laburoCopy.data.pago !== this.valorRestante && !this.efectivo) {
         errorMessage = 'Debe completar el valor restante';
       }
-      if (!this.laburoCopy.data.comprobantePago) {
+      if (!this.laburoCopy.data.comprobantePago && !this.url) {
         errorMessage = 'Debe cargar el comprobante';
       }
       if (!this.laburoCopy.data.cuentaFinal) {
@@ -86,7 +91,6 @@ export class ModalPagoComponent {
           'comprobantes'
         );
         this.laburoCopy.data.comprobantePago = fotoUrl;
-        console.log(fotoUrl);
       }
     }
 
@@ -124,6 +128,33 @@ export class ModalPagoComponent {
         await this.firebase.guardar(movimientoObj, 'movimientos');
       }
     }
+
+    const senaPrevia = this.originalLaburo.data.sena || 0;
+    const senaDesc = senaPrevia > 0 ? ` (seña previa: $${senaPrevia})` : '';
+    await this.auditoria.registrar({
+      accion: 'pago',
+      entidad: 'laburo',
+      entidadId: this.laburo.id,
+      descripcion: `Pago final en trabajo N°${this.laburo.data.numero} – ${this.laburo.data.cliente ?? this.laburo.data.clienteid} – $${this.valorRestante}${senaDesc}`,
+      datoAnterior: {
+        sena: this.originalLaburo.data.sena,
+        pago: this.originalLaburo.data.pago,
+        pagoEfectivo: this.originalLaburo.data.pagoEfectivo,
+        cajaFinal: this.originalLaburo.data.cajaFinal,
+        cajaFinalEfectivo: this.originalLaburo.data.cajaFinalEfectivo,
+        cuentaFinal: this.originalLaburo.data.cuentaFinal,
+        comprobantePago: this.originalLaburo.data.comprobantePago,
+      },
+      datoNuevo: {
+        sena: this.laburo.data.sena,
+        pago: this.laburo.data.pago,
+        pagoEfectivo: this.laburo.data.pagoEfectivo,
+        cajaFinal: this.laburo.data.cajaFinal,
+        cajaFinalEfectivo: this.laburo.data.cajaFinalEfectivo,
+        cuentaFinal: this.laburo.data.cuentaFinal,
+        comprobantePago: this.laburo.data.comprobantePago,
+      },
+    });
 
     this.confirmationService.emitAddPagoEvent();
     this.confirmationService.setConfirmationState(true);

@@ -3,6 +3,7 @@ import { getApp, getApps, initializeApp } from 'firebase/app';
 import {
   Firestore,
   addDoc,
+  setDoc,
   collection,
   deleteDoc,
   doc,
@@ -16,6 +17,8 @@ import {
   limit,
   runTransaction,
   startAfter,
+  onSnapshot,
+  QueryOrderByConstraint,
 } from 'firebase/firestore';
 import { environment } from 'src/environments/environment';
 
@@ -35,7 +38,12 @@ export class FirebaseService {
 
   guardar(data: any, ruta: string) {
     const colRef = collection(this.db, ruta);
-    return addDoc(colRef, data);
+    return addDoc(colRef, JSON.parse(JSON.stringify(data)));
+  }
+
+  async guardarConId(data: any, ruta: string, id: string): Promise<void> {
+    const docRef = doc(this.db, ruta, id);
+    await setDoc(docRef, JSON.parse(JSON.stringify(data)));
   }
 
   async obtenerUno(ruta: string, uid: string) {
@@ -126,16 +134,24 @@ export class FirebaseService {
     return array;
   }
 
-  async modificar(data: any, ruta: string) {
-    let retorno = false;
+  async modificar(data: any, ruta: string): Promise<boolean> {
     const usuarioRef = collection(this.db, ruta);
     const documento = doc(usuarioRef, data.id);
-    await updateDoc(documento, data.data)
-      .then(() => {
-        retorno = true;
-      })
-      .catch(() => {});
-    return retorno;
+    await updateDoc(documento, JSON.parse(JSON.stringify(data.data)));
+    return true;
+  }
+
+  async obtenerDondeOrdenado(
+    path: string,
+    campo: string,
+    valor: string,
+    ordenCampo: string,
+    ordenDir: 'asc' | 'desc' = 'asc'
+  ): Promise<any[]> {
+    const colRef = collection(this.db, path);
+    const q = query(colRef, where(campo, '==', valor), orderBy(ordenCampo, ordenDir));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map((d) => ({ id: d.id, data: d.data() }));
   }
 
   async obtenerDonde(path: string, condicion: string, condicion2: string) {
@@ -151,6 +167,13 @@ export class FirebaseService {
       array.push(data);
     });
     return array;
+  }
+
+  escucharDocumento(ruta: string, id: string, callback: (data: any | null) => void): () => void {
+    const docRef = doc(this.db, ruta, id);
+    return onSnapshot(docRef, (snapshot) => {
+      callback(snapshot.exists() ? snapshot.data() : null);
+    });
   }
 
   async borrar(data: any, ruta: string) {

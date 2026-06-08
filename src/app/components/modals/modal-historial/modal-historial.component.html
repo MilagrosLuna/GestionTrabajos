@@ -1,0 +1,56 @@
+<div class="modal-header">
+  <h5 class="modal-title">
+    Historial — N°{{ laburo?.data?.numero }} {{ laburo?.data?.cliente || laburo?.data?.clienteInfo?.nombre || '' }}
+  </h5>
+  <button type="button" class="btn-close" (click)="cerrar()" aria-label="Cerrar"></button>
+</div>
+
+<div class="modal-body historial-body">
+  <div *ngIf="loading" class="text-center py-4">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+  </div>
+
+  <div *ngIf="!loading && entradas.length === 0" class="text-center text-muted py-4">
+    No hay eventos registrados para este trabajo.
+  </div>
+
+  <ul *ngIf="!loading && entradas.length > 0" class="timeline">
+    <li *ngFor="let entrada of entradas" class="timeline-item">
+      <div class="timeline-dot" [ngClass]="badgeClass(entrada.accion)"></div>
+      <div class="timeline-content">
+        <div class="d-flex align-items-center gap-2 mb-1">
+          <span class="badge" [ngClass]="badgeClass(entrada.accion)">
+            {{ accionLabel(entrada.accion) }}
+          </span>
+          <small class="text-muted">{{ formatFecha(entrada.timestamp) }}</small>
+          <small class="text-muted">· {{ entrada.nombreUsuario }}</small>
+        </div>
+        <p class="mb-1">{{ entrada.descripcion }}</p>
+        <div *ngIf="entrada.cambios.length > 0" class="cambios-table">
+          <table class="table table-sm table-bordered mb-0">
+            <thead>
+              <tr>
+                <th>Campo</th>
+                <th>Antes</th>
+                <th>Después</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let c of entrada.cambios">
+                <td>{{ c.campo }}</td>
+                <td class="text-danger">{{ c.antes }}</td>
+                <td class="text-success">{{ c.despues }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </li>
+  </ul>
+</div>
+
+<div class="modal-footer">
+  <button type="button" class="btn btn-secondary" (click)="cerrar()">Cerrar</button>
+</div>

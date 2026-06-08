@@ -1,5 +1,7 @@
 {
   "projects": {
-    "default": "graficas3197"
+    "default": "graficas3197",
+    "prod": "graficas3197",
+    "dev": "phoenix-2e79a"
   }
 }

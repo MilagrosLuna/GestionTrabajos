@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\27458730348\\\\Desktop\\\\GestionTrabajos\" -Force)",
+      "Bash(Select-Object Name, PSIsContainer)",
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\27458730348\\\\Desktop\\\\GestionTrabajos\" -Recurse -Name)",
+      "Bash(npx ng *)",
+      "Bash(npm install *)",
+      "Bash(npx tsc *)",
+      "Bash(npx firebase-tools *)"
+    ]
+  }
+}

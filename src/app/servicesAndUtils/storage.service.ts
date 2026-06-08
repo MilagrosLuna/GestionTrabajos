@@ -6,6 +6,9 @@ import {
   uploadBytes,
 } from 'firebase/storage';
 
+const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+
 @Injectable({
   providedIn: 'root',
 })
@@ -13,6 +16,15 @@ export class StorageService {
   private storage = getStorage();
 
   constructor() {}
+
+  validateFile(file: File): void {
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      throw new Error('Tipo de archivo no permitido. Solo JPG, PNG o PDF.');
+    }
+    if (file.size > MAX_FILE_SIZE) {
+      throw new Error('El archivo es demasiado grande. Máximo 10 MB.');
+    }
+  }
 
   async guardarFoto2(dataUrl: string, ruta: string) {
     let hora = new Date().getTime();
@@ -28,13 +40,12 @@ export class StorageService {
   }
 
   async guardarFoto(file: File, ruta: string) {
-    let hora = new Date().getTime();
-    let ubicacion = '/' + ruta + '/' + hora;
-    const imgRef = ref(this.storage, ubicacion);
-
+    this.validateFile(file);
+    const ext = file.name.split('.').pop()?.toLowerCase() ?? 'bin';
+    const safeName = `${Date.now()}.${ext}`;
+    const imgRef = ref(this.storage, `/${ruta}/${safeName}`);
     await uploadBytes(imgRef, file);
-    const imgUrl = await getDownloadURL(imgRef);
-    return imgUrl;
+    return await getDownloadURL(imgRef);
   }
 
   private dataURLtoBlob(dataurl: any) {

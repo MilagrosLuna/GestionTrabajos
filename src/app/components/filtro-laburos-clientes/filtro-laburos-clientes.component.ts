@@ -8,7 +8,7 @@ import { ModalComponent } from '../modals/modal/modal.component';
 import { ModalDeleteComponent } from '../modals/modal-delete/modal-delete.component';
 import { ModalPagoComponent } from '../modals/modal-pago/modal-pago.component';
 import { ModalComentarioComponent } from '../modals/modal-comentario/modal-comentario.component';
-import { AuthService } from 'src/app/servicesAndUtils/auth.service';
+import { AdminService } from 'src/app/servicesAndUtils/admin.service';
 
 @Component({
   selector: 'app-filtro-laburos-clientes',
@@ -18,7 +18,6 @@ import { AuthService } from 'src/app/servicesAndUtils/auth.service';
 export class FiltroLaburosClientesComponent implements OnInit {
   id: string | null = null;
   laburos: any[] = [];
-  admins: any[] = [];
   filteredLaburos: any[] = [];
   cuentas: any[] = [];
   loading: boolean = true;
@@ -31,11 +30,13 @@ export class FiltroLaburosClientesComponent implements OnInit {
     private firebase: FirebaseService,
     private modalService: MdbModalService,
     private confirmationService: ConfirmationService,
-    private authService: AuthService
+    private adminService: AdminService
   ) {}
 
   async ngOnInit(): Promise<void> {
-    await this.verificar();
+    this.adminService.getEsAdmin().subscribe((esAdmin) => {
+      this.esAdmin = esAdmin;
+    });
     await this.subscribeToConfirmationEvents();
     this.route.params.subscribe(async (params) => {
       this.id = params['id'];
@@ -54,19 +55,13 @@ export class FiltroLaburosClientesComponent implements OnInit {
           this.filteredLaburos = this.laburos.map((laburo) =>
             this.transformLaburo(laburo)
           );
-        } catch (error) {
-          console.error('Error fetching laburos:', error);
+        } catch {
+          // silently ignore load errors — loading=false still runs in finally
         } finally {
           this.loading = false;
         }
       }
     });
-  }
-
-  async verificar() {
-    this.admins = await this.firebase.obtener('admins');
-    const uid = this.authService.getCurrentUid();
-    this.esAdmin = this.admins.some((admin) => admin.data.id === uid);
   }
 
   private transformLaburo(laburo: any): any {
@@ -76,14 +71,15 @@ export class FiltroLaburosClientesComponent implements OnInit {
         ...laburo.data,
         cuentaNombreSena: this.getCuentaNameById(laburo.data.cuentaSena),
         cuentaNombreFinal: this.getCuentaNameById(laburo.data.cuentaFinal),
-        
       },
     };
   }
+
   getCuentaNameById(id: string): string {
     return this.cuentasMap[id] || '';
   }
-  private async reloasdData(): Promise<void> {
+
+  private async reloadData(): Promise<void> {
     this.loading = true;
     if (this.id != null) {
       try {
@@ -92,36 +88,34 @@ export class FiltroLaburosClientesComponent implements OnInit {
           'clienteid',
           this.id
         );
-            
         this.filteredLaburos = this.laburos.map((laburo) =>
           this.transformLaburo(laburo)
         );
-
-      } catch (error) {
-        console.error('Error fetching laburos:', error);
+      } catch {
+        // silently ignore reload errors
       } finally {
         this.loading = false;
       }
     }
   }
-  
+
   private async subscribeToConfirmationEvents(): Promise<void> {
     this.confirmationService.getConfirmationState().subscribe(async (state) => {
       if (state) {
-        await this.reloasdData();
+        await this.reloadData();
       }
     });
 
     this.confirmationService.getDeleteEvent().subscribe(async () => {
-      await this.reloasdData();
+      await this.reloadData();
     });
 
     this.confirmationService.getAddPagoEvent().subscribe(async () => {
-      await this.reloasdData();
+      await this.reloadData();
     });
 
     this.confirmationService.getAddComentarioEvent().subscribe(async () => {
-      await this.reloasdData();
+      await this.reloadData();
     });
   }
 

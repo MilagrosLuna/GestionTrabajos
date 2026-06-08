@@ -1,0 +1,81 @@
+.historial-body {
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.timeline {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 10px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #dee2e6;
+  }
+}
+
+.timeline-item {
+  position: relative;
+  padding-left: 36px;
+  margin-bottom: 1.5rem;
+}
+
+.timeline-dot {
+  position: absolute;
+  left: 4px;
+  top: 4px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 2px #adb5bd;
+}
+
+.timeline-content {
+  background: #f8f9fa;
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.cambios-table {
+  font-size: 0.82rem;
+  margin-top: 0.5rem;
+}
+
+/* Action badge colors */
+.badge-alta {
+  background-color: #198754 !important;
+  color: #fff;
+}
+
+.badge-edicion {
+  background-color: #0d6efd !important;
+  color: #fff;
+}
+
+.badge-eliminacion {
+  background-color: #dc3545 !important;
+  color: #fff;
+}
+
+.badge-pago {
+  background-color: #0dcaf0 !important;
+  color: #000;
+}
+
+.badge-retiro {
+  background-color: #fd7e14 !important;
+  color: #fff;
+}
+
+.badge-estado {
+  background-color: #6f42c1 !important;
+  color: #fff;
+}

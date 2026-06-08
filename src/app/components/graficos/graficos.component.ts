@@ -19,312 +19,6 @@ export class GraficosComponent {
   laburos: any[] = [];
   laburosCargados: any[] = [];
 
-  laburos2: any[] = [
-    {
-      id: '6yXgICYfqlQiC1yAnhpP',
-      data: {
-        cajaFinal: '',
-        cajaSena: 'transferencia',
-        cliente: 'Milagros',
-        comentario: '',
-        cuentaFinal: '',
-        cuentaNombreFinal: '',
-        cuentaNombreSena: 'mili MP',
-        cuentaSena: 'PfEwYV0cR606oglwcjO3',
-        detalle: 'aaaaaa',
-        fecha: '2023-12-11',
-        fechaEntrega: '2023-12-16',
-        pago: 0,
-        precio: 89,
-        sena: 200,
-        trabajo: 'aaaaaa',
-      },
-    },
-    {
-      id: '6yXgICYfqlQiC1yAnhpP',
-      data: {
-        cajaFinal: '',
-        cajaSena: 'transferencia',
-        cliente: 'Milagros',
-        comentario: '',
-        cuentaFinal: '',
-        cuentaNombreFinal: '',
-        cuentaNombreSena: 'mili MP',
-        cuentaSena: 'PfEwYV0cR606oglwcjO3',
-        detalle: 'aaaaaa',
-        fecha: '2023-12-11',
-        fechaEntrega: '2023-12-16',
-        pago: 0,
-        precio: 10000,
-        sena: 200,
-        trabajo: 'aaaaaa',
-      },
-    },
-    {
-      id: '6yXgICYfqlQiC1yAnhpP',
-      data: {
-        cajaFinal: '',
-        cajaSena: 'transferencia',
-        cliente: 'Milagros',
-        comentario: '',
-        cuentaFinal: '',
-        cuentaNombreFinal: '',
-        cuentaNombreSena: 'mili MP',
-        cuentaSena: 'PfEwYV0cR606oglwcjO3',
-        detalle: 'aaaaaa',
-        fecha: '2023-12-11',
-        fechaEntrega: '2023-12-16',
-        pago: 0,
-        precio: 6500,
-        sena: 200,
-        trabajo: 'aaaaaa',
-      },
-    },
-    {
-      id: '6yXgICYfqlQiC1yAnhpP',
-      data: {
-        cajaFinal: '',
-        cajaSena: 'transferencia',
-        cliente: 'Milagros',
-        comentario: '',
-        cuentaFinal: '',
-        cuentaNombreFinal: '',
-        cuentaNombreSena: 'mili MP',
-        cuentaSena: 'PfEwYV0cR606oglwcjO3',
-        detalle: 'aaaaaa',
-        fecha: '2023-12-11',
-        fechaEntrega: '2023-12-16',
-        pago: 0,
-        precio: 7000,
-        sena: 200,
-        trabajo: 'aaaaaa',
-      },
-    },
-    {
-      id: '6yXgICYfqlQiC1yAnhpP',
-      data: {
-        cajaFinal: '',
-        cajaSena: 'transferencia',
-        cliente: 'Milagros',
-        comentario: '',
-        cuentaFinal: '',
-        cuentaNombreFinal: '',
-        cuentaNombreSena: 'mili MP',
-        cuentaSena: 'PfEwYV0cR606oglwcjO3',
-        detalle: 'aaaaaa',
-        fecha: '2023-12-11',
-        fechaEntrega: '2023-12-16',
-        pago: 0,
-        precio: 8000,
-        sena: 200,
-        trabajo: 'aaaaaa',
-      },
-    },
-    {
-      id: '6yXgICYfqlQiC1yAnhpP',
-      data: {
-        cajaFinal: '',
-        cajaSena: 'transferencia',
-        cliente: 'Milagros',
-        comentario: '',
-        cuentaFinal: '',
-        cuentaNombreFinal: '',
-        cuentaNombreSena: 'mili MP',
-        cuentaSena: 'PfEwYV0cR606oglwcjO3',
-        detalle: 'aaaaaa',
-        fecha: '2023-12-11',
-        fechaEntrega: '2023-12-16',
-        pago: 0,
-        precio: 1090,
-        sena: 200,
-        trabajo: 'aaaaaa',
-      },
-    },
-    {
-      id: '6yXgICYfqlQiC1yAnhpP',
-      data: {
-        cajaFinal: '',
-        cajaSena: 'transferencia',
-        cliente: 'Milagros',
-        comentario: '',
-        cuentaFinal: '',
-        cuentaNombreFinal: '',
-        cuentaNombreSena: 'mili MP',
-        cuentaSena: 'PfEwYV0cR606oglwcjO3',
-        detalle: 'aaaaaa',
-        fecha: '2023-12-11',
-        fechaEntrega: '2023-12-16',
-        pago: 0,
-        precio: 1040,
-        sena: 200,
-        trabajo: 'aaaaaa',
-      },
-    },
-    {
-      id: '6yXgICYfqlQiC1yAnhpP',
-      data: {
-        cajaFinal: '',
-        cajaSena: 'transferencia',
-        cliente: 'Milagros',
-        comentario: '',
-        cuentaFinal: '',
-        cuentaNombreFinal: '',
-        cuentaNombreSena: 'mili MP',
-        cuentaSena: 'PfEwYV0cR606oglwcjO3',
-        detalle: 'aaaaaa',
-        fecha: '2023-12-11',
-        fechaEntrega: '2023-12-16',
-        pago: 0,
-        precio: 31000,
-        sena: 200,
-        trabajo: 'aaaaaa',
-      },
-    },
-    {
-      id: '6yXgICYfqlQiC1yAnhpP',
-      data: {
-        cajaFinal: '',
-        cajaSena: 'transferencia',
-        cliente: 'Milagros',
-        comentario: '',
-        cuentaFinal: '',
-        cuentaNombreFinal: '',
-        cuentaNombreSena: 'mili MP',
-        cuentaSena: 'PfEwYV0cR606oglwcjO3',
-        detalle: 'aaaaaa',
-        fecha: '2023-12-11',
-        fechaEntrega: '2023-12-16',
-        pago: 0,
-        precio: 33000,
-        sena: 200,
-        trabajo: 'aaaaaa',
-      },
-    },
-
-    {
-      id: '6yXgICYfqlQiC1yAnhpP',
-      data: {
-        cajaFinal: '',
-        cajaSena: 'transferencia',
-        cliente: 'Milagros',
-        comentario: '',
-        cuentaFinal: '',
-        cuentaNombreFinal: '',
-        cuentaNombreSena: 'mili MP',
-        cuentaSena: 'PfEwYV0cR606oglwcjO3',
-        detalle: 'aaaaaa',
-        fecha: '2023-12-11',
-        fechaEntrega: '2023-12-16',
-        pago: 0,
-        precio: 11300,
-        sena: 200,
-        trabajo: 'aaaaaa',
-      },
-    },
-    {
-      id: '6yXgICYfqlQiC1yAnhpP',
-      data: {
-        cajaFinal: '',
-        cajaSena: 'transferencia',
-        cliente: 'Milagros',
-        comentario: '',
-        cuentaFinal: '',
-        cuentaNombreFinal: '',
-        cuentaNombreSena: 'mili MP',
-        cuentaSena: 'PfEwYV0cR606oglwcjO3',
-        detalle: 'aaaaaa',
-        fecha: '2023-12-11',
-        fechaEntrega: '2023-12-16',
-        pago: 0,
-        precio: 11000,
-        sena: 200,
-        trabajo: 'aaaaaa',
-      },
-    },
-    {
-      id: '6yXgICYfqlQiC1yAnhpP',
-      data: {
-        cajaFinal: '',
-        cajaSena: 'transferencia',
-        cliente: 'Milagros',
-        comentario: '',
-        cuentaFinal: '',
-        cuentaNombreFinal: '',
-        cuentaNombreSena: 'mili MP',
-        cuentaSena: 'PfEwYV0cR606oglwcjO3',
-        detalle: 'aaaaaa',
-        fecha: '2023-12-11',
-        fechaEntrega: '2023-12-16',
-        pago: 0,
-        precio: 6600,
-        sena: 200,
-        trabajo: 'aaaaaa',
-      },
-    },
-    {
-      id: '6yXgICYfqlQiC1yAnhpP',
-      data: {
-        cajaFinal: '',
-        cajaSena: 'transferencia',
-        cliente: 'Milagros',
-        comentario: '',
-        cuentaFinal: '',
-        cuentaNombreFinal: '',
-        cuentaNombreSena: 'mili MP',
-        cuentaSena: 'PfEwYV0cR606oglwcjO3',
-        detalle: 'aaaaaa',
-        fecha: '2023-12-11',
-        fechaEntrega: '2023-12-16',
-        pago: 0,
-        precio: 5000,
-        sena: 200,
-        trabajo: 'aaaaaa',
-      },
-    },
-    {
-      id: '6yXgICYfqlQiC1yAnhpP',
-      data: {
-        cajaFinal: '',
-        cajaSena: 'transferencia',
-        cliente: 'Milagros',
-        comentario: '',
-        cuentaFinal: '',
-        cuentaNombreFinal: '',
-        cuentaNombreSena: 'mili MP',
-        cuentaSena: 'PfEwYV0cR606oglwcjO3',
-        detalle: 'aaaaaa',
-        fecha: '2023-12-11',
-        fechaEntrega: '2023-12-16',
-        pago: 0,
-        precio: 3000,
-        sena: 200,
-        trabajo: 'aaaaaa',
-      },
-    },
-    {
-      id: '6yXgICYfqlQiC1yAnhpP',
-      data: {
-        cajaFinal: '',
-        cajaSena: 'transferencia',
-        cliente: 'Milagros',
-        comentario: '',
-        cuentaFinal: '',
-        cuentaNombreFinal: '',
-        cuentaNombreSena: 'mili MP',
-        cuentaSena: 'PfEwYV0cR606oglwcjO3',
-        detalle: 'aaaaaa',
-        fecha: '2023-12-11',
-        fechaEntrega: '2023-12-16',
-        pago: 0,
-        precio: 10200,
-        sena: 200,
-        trabajo: 'aaaaaa',
-      },
-    },
-
-    // Agrega los demás elementos aquí...
-  ];
-
   constructor(private firebase: FirebaseService, private zone: NgZone) {
     const hoy = new Date();
     const haceUnaSemana = new Date();
@@ -333,11 +27,11 @@ export class GraficosComponent {
     this.fechaFin = this.formatoFecha(hoy);
     this.fechaInicio = this.formatoFecha(haceUnaSemana);
   }
-  formatoFecha(fecha: Date): string {
-    const dia = String(fecha.getUTCDate()).padStart(2, '0');
-    const mes = String(fecha.getUTCMonth() + 1).padStart(2, '0');
-    const ano = fecha.getUTCFullYear();
 
+  formatoFecha(fecha: Date): string {
+    const ano = fecha.getFullYear();
+    const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+    const dia = String(fecha.getDate()).padStart(2, '0');
     return `${ano}-${mes}-${dia}`;
   }
 
@@ -386,29 +80,7 @@ export class GraficosComponent {
     }
   }
 
-  base64ToBlob(base64: string, type: string): Blob {
-    const binStr = atob(base64.split(',')[1]);
-    const len = binStr.length;
-    const arr = new Uint8Array(len);
-
-    for (let i = 0; i < len; i++) {
-      arr[i] = binStr.charCodeAt(i);
-    }
-
-    return new Blob([arr], { type: type });
-  }
-
-  // async cargar() {
-  //   let laburos = await this.firebase.obtener('laburos');
-  //   laburos.sort(
-  //     (a, b) =>
-  //       new Date(a.data.fecha).getTime() - new Date(b.data.fecha).getTime()
-  //   );
-  //   this.laburos = laburos;
-  // }
-
   async createChart() {
-    // Agrupa los trabajos por fecha y suma los precios
     const groupedByDate = this.laburos.reduce((groups, laburo) => {
       const fecha = this.formatoFecha(new Date(laburo.data.fecha));
       if (!groups[fecha]) {
@@ -418,17 +90,14 @@ export class GraficosComponent {
       return groups;
     }, {});
 
-    // Crea los datos de la serie
     const seriesData: echarts.SeriesOption = {
-      name: 'Ingresos: $',
+      name: 'Ingresos',
       type: 'line',
       data: Object.values(groupedByDate),
     };
 
-    // Crea los datos del eje x
     const xAxisData: string[] = Object.keys(groupedByDate);
 
-    // Configura las opciones del gráfico
     this.chartOption1 = {
       tooltip: {
         trigger: 'axis',
@@ -451,6 +120,9 @@ export class GraficosComponent {
   }
 
   async filtrarPorFecha() {
+    if (this.fechaInicio > this.fechaFin) {
+      return;
+    }
     this.laburos = this.laburosCargados.filter((laburo) => {
       const fechaLaburo = new Date(laburo.data.fecha);
       return (

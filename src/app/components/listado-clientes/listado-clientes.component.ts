@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FirebaseService } from 'src/app/servicesAndUtils/firebase.service';
 import { Router } from '@angular/router';
-import { AuthService } from 'src/app/servicesAndUtils/auth.service';
+import { AdminService } from 'src/app/servicesAndUtils/admin.service';
 
 @Component({
   selector: 'app-listado-clientes',
@@ -16,19 +16,20 @@ export class ListadoClientesComponent implements OnInit {
   ultimoDoc: any = null;
   clientesPorPagina: number = 8;
   esAdmin: boolean = false;
-  admins: any[] = [];
   allClientsLoaded: boolean = false;
   hasMoreClients: boolean = true;
 
   constructor(
     private router: Router,
     private firebase: FirebaseService,
-    private authService: AuthService
+    private adminService: AdminService
   ) {}
 
   async ngOnInit(): Promise<void> {
     this.loading = true;
-    await this.verificar();
+    this.adminService.getEsAdmin().subscribe((esAdmin) => {
+      this.esAdmin = esAdmin;
+    });
     await this.loadClientes();
     this.loading = false;
   }
@@ -47,12 +48,6 @@ export class ListadoClientesComponent implements OnInit {
     this.allClientsLoaded = result.data.length === 0;
     this.hasMoreClients = result.data.length >= this.clientesPorPagina;
     this.search();
-  }
-
-  async verificar() {
-    this.admins = await this.firebase.obtener('admins');
-    const uid = this.authService.getCurrentUid();
-    this.esAdmin = this.admins.some((admin) => admin.data.id === uid);
   }
 
   async loadMoreClientes() {
@@ -88,13 +83,5 @@ export class ListadoClientesComponent implements OnInit {
 
   buscarLaburos(cliente: any) {
     this.router.navigate(['/home/filtro', cliente.id]);
-  }
-
-  modificar(laburo: any) {
-    // Add implementation if needed
-  }
-
-  borrar(laburo: any) {
-    // Add implementation if needed
   }
 }

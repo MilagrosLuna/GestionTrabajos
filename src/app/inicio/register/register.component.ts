@@ -23,7 +23,11 @@ export class RegisterComponent {
   ngOnInit(): void {
     this.form = new FormGroup({
       email: new FormControl('', [Validators.required, Validators.email]),
-      password: new FormControl('', [Validators.required]),
+      password: new FormControl('', [
+        Validators.required,
+        Validators.minLength(8),
+        Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/),
+      ]),
       name: new FormControl('', [Validators.required]),
     });
   }
@@ -55,7 +59,14 @@ export class RegisterComponent {
         this.alerts.showErrorMessage(this.errorMessage);
       }
     } else {
-      this.alerts.showErrorMessage('Error: complete todos los datos.');
+      const pwd = this.form.get('password');
+      if (pwd?.errors?.['minlength'] || pwd?.errors?.['pattern']) {
+        this.alerts.showErrorMessage(
+          'La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula y un número.'
+        );
+      } else {
+        this.alerts.showErrorMessage('Error: complete todos los datos.');
+      }
     }
   }
 }

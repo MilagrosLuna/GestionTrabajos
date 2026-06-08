@@ -50,12 +50,16 @@ import { AltaClienteComponent } from './components/altaCliente/altaCliente.compo
 import { ListadoClientesComponent } from './components/listado-clientes/listado-clientes.component';
 import { FiltroLaburosClientesComponent } from './components/filtro-laburos-clientes/filtro-laburos-clientes.component';
 import { TablaLaburoComponent } from './components/tabla-laburo/tabla-laburo.component';
+import { AuditoriaComponent } from './components/auditoria/auditoria.component';
+import { ModalHistorialComponent } from './components/modals/modal-historial/modal-historial.component';
 import { MatTableModule } from '@angular/material/table';
 import { MatSortModule } from '@angular/material/sort';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatButtonModule } from '@angular/material/button';
+
 const firebaseConfig = environment.firebaseConfig;
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -82,6 +86,8 @@ const firebaseConfig = environment.firebaseConfig;
     ListadoClientesComponent,
     FiltroLaburosClientesComponent,
     TablaLaburoComponent,
+    AuditoriaComponent,
+    ModalHistorialComponent,
   ],
   imports: [
     CurrencyPipe,
@@ -112,11 +118,12 @@ const firebaseConfig = environment.firebaseConfig;
     MdbValidationModule,
     NgxEchartsModule.forRoot({ echarts }),
     BrowserAnimationsModule,
+  ],
+  providers: [
     provideFirebaseApp(() => initializeApp(firebaseConfig)),
     provideAuth(() => getAuth()),
     provideFirestore(() => getFirestore()),
   ],
-  providers: [],
   bootstrap: [AppComponent],
 })
 export class AppModule {}

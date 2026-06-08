@@ -1,0 +1,236 @@
+// ─── Shell ────────────────────────────────────────────────────────────────────
+.ph-navbar {
+  background: linear-gradient(90deg, #09090A 0%, #111009 50%, #09090A 100%);
+  border-bottom: 1px solid rgba(201, 168, 76, 0.15);
+  box-shadow: 0 2px 24px rgba(0, 0, 0, 0.6);
+  min-height: 60px;
+  padding: 0;
+
+  .container-fluid {
+    height: 60px;
+    display: flex;
+    align-items: center;
+  }
+}
+
+// ─── Logo ────────────────────────────────────────────────────────────────────
+.ph-logo {
+  height: 34px;
+  filter: brightness(1.1) drop-shadow(0 0 7px rgba(201, 168, 76, 0.3));
+  transition: filter 0.2s ease;
+
+  &:hover {
+    filter: brightness(1.3) drop-shadow(0 0 12px rgba(201, 168, 76, 0.55));
+  }
+}
+
+// ─── Toggler ─────────────────────────────────────────────────────────────────
+.ph-toggler {
+  border: 1px solid rgba(201, 168, 76, 0.28);
+  padding: 0.3rem 0.55rem;
+  border-radius: 7px;
+  background: transparent;
+  transition: background 0.15s ease;
+
+  i { color: var(--ph-gold); font-size: 0.95rem; }
+
+  &:hover { background: rgba(201, 168, 76, 0.1); }
+  &:focus { box-shadow: none; outline: none; }
+}
+
+// ─── Nav list ────────────────────────────────────────────────────────────────
+.navbar-nav {
+  gap: 2px;
+  height: 60px;
+  align-items: center;
+}
+
+// ─── Nav link base ───────────────────────────────────────────────────────────
+.ph-link {
+  display: flex !important;
+  align-items: center;
+  gap: 0.38rem;
+  padding: 0.38rem 0.7rem !important;
+  border-radius: 7px;
+  font-size: 0.815rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: rgba(220, 198, 140, 0.7) !important;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.15s ease, background 0.15s ease;
+
+  i {
+    font-size: 0.72rem;
+    opacity: 0.75;
+    transition: opacity 0.15s ease;
+  }
+
+  &:hover {
+    color: var(--ph-gold-light, #E8C96A) !important;
+    background: rgba(201, 168, 76, 0.1);
+    i { opacity: 1; }
+  }
+
+  &.ph-active {
+    color: var(--ph-gold, #C9A84C) !important;
+    background: rgba(201, 168, 76, 0.13);
+    i { opacity: 1; }
+  }
+
+  // caret del dropdown
+  &.dropdown-toggle::after {
+    margin-left: 2px;
+    vertical-align: middle;
+    border-top-color: currentColor;
+    opacity: 0.45;
+  }
+
+  &.dropdown-toggle:hover::after,
+  &.dropdown-toggle.show::after {
+    opacity: 0.85;
+  }
+}
+
+// ─── Separador vertical ──────────────────────────────────────────────────────
+.ph-vsep {
+  width: 1px;
+  height: 20px;
+  background: rgba(201, 168, 76, 0.15);
+  margin: 0 0.3rem;
+  flex-shrink: 0;
+  align-self: center;
+}
+
+// ─── Logout ──────────────────────────────────────────────────────────────────
+.ph-btn-logout {
+  display: flex;
+  align-items: center;
+  gap: 0.38rem;
+  background: rgba(192, 57, 43, 0.12);
+  border: 1px solid rgba(192, 57, 43, 0.35);
+  color: #D97060 !important;
+  font-size: 0.815rem;
+  font-weight: 500;
+  padding: 0.35rem 0.85rem;
+  border-radius: 7px;
+  transition: all 0.15s ease;
+
+  i { font-size: 0.76rem; }
+
+  &:hover {
+    background: rgba(192, 57, 43, 0.24);
+    border-color: rgba(192, 57, 43, 0.6);
+    color: #F08070 !important;
+  }
+
+  &:focus { box-shadow: none; outline: none; }
+}
+
+// ─── Registrarse ─────────────────────────────────────────────────────────────
+.ph-btn-register {
+  background: linear-gradient(135deg, var(--ph-gold-dark, #9A7A1A), var(--ph-gold, #C9A84C));
+  border: none;
+  color: #0A0A0A !important;
+  font-size: 0.815rem;
+  font-weight: 700;
+  padding: 0.38rem 1.1rem;
+  border-radius: 7px;
+  transition: filter 0.15s ease;
+
+  &:hover { filter: brightness(1.12); }
+  &:focus { box-shadow: none; outline: none; }
+}
+
+// ─── Dropdown ────────────────────────────────────────────────────────────────
+.ph-dropdown {
+  background: #0E0C08;
+  border: 1px solid rgba(201, 168, 76, 0.16);
+  border-radius: 9px;
+  box-shadow: 0 10px 36px rgba(0, 0, 0, 0.65);
+  padding: 0.35rem;
+  min-width: 168px;
+  margin-top: 4px !important;
+
+  .ph-drop-item {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    color: rgba(220, 198, 140, 0.72);
+    font-size: 0.8rem;
+    font-weight: 400;
+    padding: 0.42rem 0.7rem;
+    border-radius: 6px;
+    transition: background 0.12s ease, color 0.12s ease;
+    cursor: pointer;
+    text-decoration: none;
+
+    i {
+      width: 13px;
+      text-align: center;
+      font-size: 0.72rem;
+      opacity: 0.65;
+      flex-shrink: 0;
+    }
+
+    &:hover {
+      background: rgba(201, 168, 76, 0.11);
+      color: var(--ph-gold-light, #E8C96A);
+      i { opacity: 1; }
+    }
+
+    &:active { background: rgba(201, 168, 76, 0.18); }
+  }
+
+  .ph-drop-divider {
+    border-color: rgba(201, 168, 76, 0.1);
+    margin: 0.25rem 0.5rem;
+  }
+}
+
+// ─── Mobile (collapse abierto) ───────────────────────────────────────────────
+@media (max-width: 991.98px) {
+  .ph-navbar {
+    min-height: 60px;
+
+    .container-fluid { height: 60px; }
+
+    .navbar-collapse {
+      background: #0E0C08;
+      border-top: 1px solid rgba(201, 168, 76, 0.1);
+      padding: 0.6rem 0.25rem 0.9rem;
+    }
+
+    .navbar-nav {
+      height: auto;
+      gap: 0;
+    }
+
+    .ph-vsep { display: none !important; }
+
+    .ph-link {
+      padding: 0.55rem 0.65rem !important;
+      border-radius: 6px;
+      width: 100%;
+    }
+
+    // dropdown en mobile: desplegado inline
+    .dropdown-menu.ph-dropdown {
+      position: static !important;
+      background: transparent;
+      border: none;
+      box-shadow: none;
+      padding: 0 0 0 1.2rem;
+      margin: 0 !important;
+      transform: none !important;
+
+      .ph-drop-item { padding: 0.4rem 0.5rem; }
+    }
+
+    .ph-btn-logout {
+      width: 100%;
+      justify-content: center;
+      margin-top: 0.5rem;
+    }
+  }
+}

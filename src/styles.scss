@@ -1,27 +1,235 @@
-/* You can add global styles to this file, and also import other style files */
 @import "@fortawesome/fontawesome-free/scss/fontawesome.scss";
 @import "@fortawesome/fontawesome-free/scss/solid.scss";
 @import "@fortawesome/fontawesome-free/scss/regular.scss";
 @import "@fortawesome/fontawesome-free/scss/brands.scss";
-
 @import "mdb-angular-ui-kit/assets/scss/mdb.scss";
-.contenedor {
-  background-color: #eee;
+
+// ── Phoenix Brand Tokens ────────────────────────────────────────
+// Colors taken from the Phoenix logo:
+//   Gold wing feathers  → #C9A84C / #DAA520
+//   Copper wing feathers → #C17D3C / #A0522D
+//   Crimson base wave   → #C0392B / #8B0000
+//   Background          → #0A0A0A (near-black)
+:root {
+  --ph-gold:        #C9A84C;
+  --ph-gold-dark:   #9A7A1A;
+  --ph-gold-light:  #E8C96A;
+  --ph-copper:      #C17D3C;
+  --ph-copper-dark: #8B4513;
+  --ph-crimson:     #C0392B;
+  --ph-crimson-dark:#8B0000;
+  --ph-black:       #0A0A0A;
+  --ph-dark-1:      #1C1A0E;
+  --ph-dark:        #2d2d2d;
+  --ph-gray:        #6b6b6b;
+  --ph-light:       #F5F0E6;
+  --ph-cream:       #FDFAF3;
+  --ph-white:       #FFFFFF;
+  --ph-success:     #27ae60;
+  --ph-transfer:    #2980b9;
+  --shadow-sm:      0 1px 6px rgba(0, 0, 0, 0.09);
+  --shadow-md:      0 4px 18px rgba(0, 0, 0, 0.13);
+  --shadow-lg:      0 8px 32px rgba(0, 0, 0, 0.18);
+  --radius:         10px;
+  --radius-lg:      16px;
+  --transition:     all 0.2s ease;
 }
 
-.invalid {
-  color: red;
-  font-size: 12px;
-  margin-top: 5px;
-}
-
-.gradient-custom-2 {
-  background: linear-gradient(to bottom, #f4291f, #f1e575);
-}
-
-.gradient-custom-3 {
-  background: linear-gradient(to bottom, #f1e575, #f4291f);
-}
-
+// ── Base ────────────────────────────────────────────────────────
 html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  background-color: var(--ph-light);
+  color: var(--ph-dark);
+}
+
+.contenedor { background-color: var(--ph-light); }
+
+// ── Brand gradients (gold → copper, matching left→right wing) ───
+.gradient-custom-2 {
+  background: linear-gradient(135deg, var(--ph-gold-dark) 0%, var(--ph-gold) 45%, var(--ph-copper) 100%);
+}
+.gradient-custom-3 {
+  background: linear-gradient(135deg, var(--ph-copper) 0%, var(--ph-gold) 55%, var(--ph-gold-dark) 100%);
+}
+
+// ── Form validation ─────────────────────────────────────────────
+.invalid {
+  color: var(--ph-crimson);
+  font-size: 11.5px;
+  margin-top: 4px;
+  display: block;
+}
+
+// ── Cards ───────────────────────────────────────────────────────
+.card {
+  border: none !important;
+  border-radius: var(--radius) !important;
+  box-shadow: var(--shadow-sm) !important;
+  background-color: var(--ph-white) !important;
+  transition: var(--transition) !important;
+}
+.card:hover {
+  box-shadow: var(--shadow-md) !important;
+  transform: translateY(-2px);
+}
+
+// ── Section title ───────────────────────────────────────────────
+.section-title {
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: var(--ph-dark);
+  border-left: 4px solid var(--ph-gold);
+  padding-left: 12px;
+  margin-bottom: 1.5rem;
+}
+
+// ── Scrollbar ────────────────────────────────────────────────────
+::-webkit-scrollbar       { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #e8e0d0; }
+::-webkit-scrollbar-thumb { background: var(--ph-gold); border-radius: 3px; opacity: 0.6; }
+::-webkit-scrollbar-thumb:hover { background: var(--ph-gold-dark); }
+
+// ── Spinners ────────────────────────────────────────────────────
+.spinner-border.text-primary { color: var(--ph-gold) !important; }
+
+// ── Primary buttons → gold ───────────────────────────────────────
+.btn-primary {
+  background: linear-gradient(135deg, var(--ph-gold-dark), var(--ph-gold)) !important;
+  border-color: var(--ph-gold-dark) !important;
+  color: var(--ph-black) !important;
+  font-weight: 600;
+}
+.btn-primary:hover,
+.btn-primary:focus {
+  background: linear-gradient(135deg, var(--ph-gold), var(--ph-gold-light)) !important;
+  border-color: var(--ph-gold) !important;
+  color: var(--ph-black) !important;
+  box-shadow: 0 4px 14px rgba(201, 168, 76, 0.5) !important;
+}
+
+// ── Danger buttons → crimson ─────────────────────────────────────
+.btn-danger {
+  background: linear-gradient(135deg, var(--ph-crimson-dark), var(--ph-crimson)) !important;
+  border-color: var(--ph-crimson-dark) !important;
+}
+.btn-danger:hover {
+  background: linear-gradient(135deg, var(--ph-crimson), var(--ph-crimson-dark)) !important;
+  box-shadow: 0 4px 14px rgba(192, 57, 43, 0.45) !important;
+}
+
+// ── Outline danger ───────────────────────────────────────────────
+.btn-outline-danger {
+  color: var(--ph-crimson) !important;
+  border-color: var(--ph-crimson) !important;
+}
+.btn-outline-danger:hover {
+  background-color: var(--ph-crimson) !important;
+  color: #fff !important;
+}
+
+// ── Form focus → gold glow ───────────────────────────────────────
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--ph-gold) !important;
+  box-shadow: 0 0 0 0.2rem rgba(201, 168, 76, 0.2) !important;
+}
+
+.input-group .input-group-text {
+  background-color: var(--ph-white);
+  border-color: #ced4da;
+  color: var(--ph-gray);
+}
+
+// ── Badges ───────────────────────────────────────────────────────
+.badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.35em 0.7em;
+  border-radius: 6px;
+}
+
+// ── Form checkbox ────────────────────────────────────────────────
+.form-check-input:checked {
+  background-color: var(--ph-gold) !important;
+  border-color: var(--ph-gold-dark) !important;
+}
+
+// ── Form controls global ─────────────────────────────────────────
+.form-control,
+.form-select {
+  border-radius: 8px !important;
+  border-color: #ddd5c0 !important;
+  &:focus {
+    border-color: var(--ph-gold) !important;
+    box-shadow: 0 0 0 0.2rem rgba(201, 168, 76, 0.18) !important;
+  }
+}
+.input-group-text {
+  border-color: #ddd5c0 !important;
+}
+
+// ── SweetAlert2 — Phoenix brand overrides ────────────────────────
+// Toast notifications
+.ph-toast.swal2-popup {
+  font-family: Roboto, "Helvetica Neue", sans-serif !important;
+  border-radius: 10px !important;
+  font-size: 0.88rem !important;
+  border-left: 4px solid transparent;
+
+  &.swal2-icon-success { border-left-color: var(--ph-gold) !important; }
+  &.swal2-icon-error   { border-left-color: var(--ph-crimson) !important; }
+  &.swal2-icon-warning { border-left-color: var(--ph-copper) !important; }
+  &.swal2-icon-info    { border-left-color: var(--ph-transfer) !important; }
+
+  .swal2-title {
+    font-size: 0.95rem !important;
+    font-weight: 700 !important;
+    color: var(--ph-black) !important;
+    padding: 0 !important;
+  }
+  .swal2-html-container {
+    font-size: 0.82rem !important;
+    color: var(--ph-gray) !important;
+    margin: 0 !important;
+  }
+  .swal2-timer-progress-bar { background: var(--ph-gold) !important; }
+}
+
+// Confirmation popup
+.ph-confirm-popup.swal2-popup {
+  font-family: Roboto, "Helvetica Neue", sans-serif !important;
+  border-radius: 14px !important;
+  padding: 2rem !important;
+
+  .swal2-title {
+    font-weight: 700;
+    font-size: 1.15rem;
+    color: var(--ph-black);
+  }
+  .swal2-html-container {
+    color: var(--ph-gray);
+    font-size: 0.92rem;
+  }
+  .swal2-confirm {
+    background: linear-gradient(135deg, var(--ph-gold-dark), var(--ph-gold)) !important;
+    color: var(--ph-black) !important;
+    font-weight: 700 !important;
+    border-radius: 8px !important;
+    border: none !important;
+    box-shadow: 0 3px 10px rgba(201, 168, 76, 0.4) !important;
+    &:hover { box-shadow: 0 5px 16px rgba(201, 168, 76, 0.6) !important; }
+  }
+  .swal2-cancel {
+    background-color: #6b6b6b !important;
+    color: #fff !important;
+    font-weight: 600 !important;
+    border-radius: 8px !important;
+    border: none !important;
+  }
+  .swal2-icon.swal2-warning {
+    border-color: var(--ph-copper) !important;
+    color: var(--ph-copper) !important;
+  }
+}

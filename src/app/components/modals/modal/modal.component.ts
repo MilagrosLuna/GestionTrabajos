@@ -2,6 +2,7 @@ import { Component, Input } from '@angular/core';
 import { MdbModalRef } from 'mdb-angular-ui-kit/modal';
 import { Movimiento } from 'src/app/clases/movimiento';
 import { AlertsService } from 'src/app/servicesAndUtils/alerts.service';
+import { AuditoriaService } from 'src/app/servicesAndUtils/auditoria.service';
 import { ConfirmationService } from 'src/app/servicesAndUtils/confirmation.service';
 import { FirebaseService } from 'src/app/servicesAndUtils/firebase.service';
 import { StorageService } from 'src/app/servicesAndUtils/storage.service';
@@ -25,7 +26,8 @@ export class ModalComponent {
     private confirmationService: ConfirmationService,
     private firebase: FirebaseService,
     private alerts: AlertsService,
-    private storageService: StorageService
+    private storageService: StorageService,
+    private auditoria: AuditoriaService
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -70,7 +72,6 @@ export class ModalComponent {
         return;
       }
 
-      console.log(this.urlpago);
       if (this.urlpago !== null) {
         let fotoUrl = await this.storageService.guardarFoto(
           this.urlpago,
@@ -93,9 +94,20 @@ export class ModalComponent {
       await this.checkValueMovimiento('sena');
     }
 
+    const datoAnterior = this.originalLaburo.data;
     this.laburo = { ...this.laburoCopy };
 
     await this.firebase.modificar(this.laburo, 'laburos');
+
+    await this.auditoria.registrar({
+      accion: 'edicion',
+      entidad: 'laburo',
+      entidadId: this.laburo.id,
+      descripcion: `Editó trabajo N°${this.laburo.data.numero} – ${this.laburo.data.cliente ?? this.laburo.data.clienteid}`,
+      datoAnterior,
+      datoNuevo: this.laburo.data,
+    });
+
     this.confirmationService.setConfirmationState(true);
     this.modalRef.close();
   }

@@ -1,0 +1,111 @@
+section.gradient-form {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #F5F0E6 0%, #EDE5D0 100%) !important;
+  display: flex;
+  align-items: center;
+
+  .card {
+    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.2) !important;
+    border-radius: var(--radius-lg, 16px) !important;
+    overflow: hidden;
+    border: 1px solid rgba(201, 168, 76, 0.12) !important;
+  }
+
+  .card-body {
+    padding: 2.5rem !important;
+    background-color: var(--ph-white, #fff);
+  }
+
+  .text-center img {
+    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.18));
+  }
+
+  h4.mt-3 {
+    font-weight: 700;
+    color: var(--ph-black, #0A0A0A);
+    letter-spacing: 0.4px;
+    font-size: 1.1rem;
+  }
+
+  p {
+    color: var(--ph-gray, #6b6b6b);
+    font-size: 0.9rem;
+  }
+
+  // Right panel — dark premium with gold accent
+  .gradient-custom-2 {
+    background: linear-gradient(160deg, #0D0D0D 0%, #1C1400 40%, #2A1800 70%, #0D0800 100%) !important;
+    border-radius: 0 var(--radius-lg, 16px) var(--radius-lg, 16px) 0;
+    display: flex;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+
+    // Subtle gold shimmer line at top
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 10%;
+      right: 10%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(201, 168, 76, 0.5), transparent);
+    }
+
+    h4 {
+      font-weight: 700;
+      font-size: 1.5rem;
+      color: var(--ph-gold, #C9A84C);
+      text-shadow: 0 0 20px rgba(201, 168, 76, 0.3);
+    }
+
+    p.small {
+      color: rgba(232, 201, 106, 0.75);
+      line-height: 1.85;
+    }
+  }
+
+  // Submit button — gold gradient
+  button.gradient-custom-2 {
+    background: linear-gradient(135deg, var(--ph-gold-dark, #9A7A1A), var(--ph-gold, #C9A84C), var(--ph-copper, #C17D3C)) !important;
+    border: none;
+    color: var(--ph-black, #0A0A0A);
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    padding: 0.72rem 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 18px rgba(201, 168, 76, 0.4);
+    width: 100%;
+    font-size: 0.95rem;
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+
+    &:hover {
+      box-shadow: 0 6px 24px rgba(201, 168, 76, 0.6);
+      transform: translateY(-1px);
+    }
+  }
+
+  a.text-muted {
+    cursor: pointer;
+    font-size: 0.85rem;
+    color: var(--ph-gray, #6b6b6b) !important;
+    text-decoration: none;
+    &:hover {
+      color: var(--ph-gold, #C9A84C) !important;
+      text-decoration: underline;
+    }
+  }
+
+  .btn-outline-danger {
+    border-radius: 8px;
+    font-weight: 500;
+    padding: 0.45rem 1.4rem;
+    color: var(--ph-copper, #C17D3C) !important;
+    border-color: var(--ph-copper, #C17D3C) !important;
+
+    &:hover {
+      background-color: var(--ph-copper, #C17D3C) !important;
+      color: #fff !important;
+    }
+  }
+}

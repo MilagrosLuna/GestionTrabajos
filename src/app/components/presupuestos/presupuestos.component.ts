@@ -1,7 +1,8 @@
 import { Component } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { Presupuesto } from 'src/app/clases/presupuesto';
+import { EstadoPresupuesto, Presupuesto } from 'src/app/clases/presupuesto';
 import { AlertsService } from 'src/app/servicesAndUtils/alerts.service';
+import { AuditoriaService } from 'src/app/servicesAndUtils/auditoria.service';
 import { FirebaseService } from 'src/app/servicesAndUtils/firebase.service';
 import * as pdfMake from 'pdfmake/build/pdfmake';
 import * as pdfFonts from 'pdfmake/build/vfs_fonts';
@@ -15,14 +16,24 @@ import { HttpClient } from '@angular/common/http';
 })
 export class PresupuestosComponent {
   form!: FormGroup;
-  constructor(
-    private firebase: FirebaseService,
-    private alerts: AlertsService,
-    private http: HttpClient
-  ) {}
   presupuestos: any[] = [];
   ultimoDoc: any = null;
   hayMas: boolean = true;
+  cambiandoEstado: string | null = null;
+
+  readonly ESTADOS: { value: EstadoPresupuesto; label: string; clase: string }[] = [
+    { value: 'pendiente', label: 'Pendiente', clase: 'badge bg-warning text-dark' },
+    { value: 'aprobado', label: 'Aprobado', clase: 'badge bg-success' },
+    { value: 'rechazado', label: 'Rechazado', clase: 'badge bg-danger' },
+    { value: 'convertido', label: 'Convertido a trabajo', clase: 'badge bg-primary' },
+  ];
+
+  constructor(
+    private firebase: FirebaseService,
+    private alerts: AlertsService,
+    private http: HttpClient,
+    private auditoria: AuditoriaService
+  ) {}
 
   async ngOnInit(): Promise<void> {
     this.form = new FormGroup({
@@ -71,6 +82,33 @@ export class PresupuestosComponent {
     return `${today.getFullYear()}-${month}-${day}`;
   }
 
+  getEstadoInfo(estado: EstadoPresupuesto | undefined) {
+    return this.ESTADOS.find(e => e.value === (estado ?? 'pendiente')) ?? this.ESTADOS[0];
+  }
+
+  async cambiarEstado(p: any, nuevoEstado: EstadoPresupuesto): Promise<void> {
+    if (this.cambiandoEstado === p.id) return;
+    this.cambiandoEstado = p.id;
+    const estadoAnterior = p.data.estado ?? 'pendiente';
+    try {
+      p.data.estado = nuevoEstado;
+      await this.firebase.modificar(p, 'presupuestos');
+      await this.auditoria.registrar({
+        accion: 'estado_presupuesto',
+        entidad: 'presupuesto',
+        entidadId: p.id,
+        descripcion: `Cambió estado de presupuesto N°${p.data.numero} – ${p.data.cliente}: "${estadoAnterior}" → "${nuevoEstado}"`,
+        datoAnterior: { estado: estadoAnterior },
+        datoNuevo: { estado: nuevoEstado },
+      });
+    } catch {
+      this.alerts.showErrorMessage('No se pudo actualizar el estado.');
+      p.data.estado = estadoAnterior;
+    } finally {
+      this.cambiandoEstado = null;
+    }
+  }
+
   async volverAGenerarPDF(p: any) {
     await this.createPDF(p.data);
   }
@@ -82,17 +120,25 @@ export class PresupuestosComponent {
       presupuesto.cliente = this.form.value.cliente;
       presupuesto.fecha = this.form.value.fecha;
       presupuesto.precio = this.form.value.precio;
+      presupuesto.estado = 'pendiente';
 
       const contador = await this.firebase.incrementarContador('presupuestos');
       presupuesto.numero = contador;
 
       let presupuestoObj = JSON.parse(JSON.stringify(presupuesto));
-      await this.firebase.guardar(presupuestoObj, 'presupuestos');
-      // console.log(presupuesto);
+      const docRef = await this.firebase.guardar(presupuestoObj, 'presupuestos');
+      await this.auditoria.registrar({
+        accion: 'alta',
+        entidad: 'presupuesto',
+        entidadId: docRef.id,
+        descripcion: `Creó presupuesto N°${presupuesto.numero} – ${presupuesto.cliente}`,
+        datoNuevo: presupuestoObj,
+      });
       await this.createPDF(presupuesto);
       this.form.reset({
         fecha: this.getCurrentDate(),
       });
+      await this.loadPresupuestos();
     } else {
       this.alerts.showErrorMessage('Debe completar todos los datos');
     }
@@ -122,14 +168,6 @@ export class PresupuestosComponent {
     }/${now.getFullYear()} a las ${now.getHours()}:${now.getMinutes()} hs`;
 
     let pdfDefinition: any = {
-      // watermark: {
-      //   text: 'Clinica online Milagros Luna',
-      //   color: 'blue',
-      //   opacity: 0.1,
-      //   bold: true,
-      //   italics: false,
-      // },
-      // a tuple of four values `[left, top, right, bottom]`
       header: {
         image: imagen,
         width: 220,
@@ -137,11 +175,6 @@ export class PresupuestosComponent {
         margin: [0, 10, 10, 0],
       },
       content: [
-        // {
-        //   image: imagen,
-        //   width: 220,
-        //   alignment: 'right',
-        // },
         {
           text: `Presupuesto `,
           fontSize: 16,
@@ -162,13 +195,11 @@ export class PresupuestosComponent {
           fontSize: 16,
           margin: [0, 5, 0, 0],
         },
-
         {
           text: `-------------------------------------------------------------------------------------------------------------------`,
           fontSize: 16,
           margin: [0, 10, 0, 0],
         },
-
         {
           text: `Detalle:`,
           fontSize: 16,
@@ -187,7 +218,6 @@ export class PresupuestosComponent {
           margin: [0, 10, 0, 0],
         },
       ],
-      // a tuple of four values `[left, top, right, bottom]`
       footer: [
         {
           text: `Por consultas comunicarse al: 11 6942-8551 / 15-4084-3420`,

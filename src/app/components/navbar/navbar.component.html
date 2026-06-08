@@ -1,133 +1,139 @@
-<nav class="navbar fixed-top navbar-expand-lg navbar-light bg-light">
-  <div class="container">
-    <a class="navbar-brand me-2" href="/home/alta">
-      <img
-        src="../../../assets/logo.png"
-        height="16"
-        alt=""
-        loading="lazy"
-        style="margin-top: -1px"
-      />
+<nav class="navbar fixed-top navbar-expand-lg ph-navbar">
+  <div class="container-fluid px-3 px-lg-4">
+
+    <a class="navbar-brand" [routerLink]="logueado ? '/home/alta' : '/login'">
+      <img src="../../../assets/logo.png" alt="Phoenix" loading="eager" class="ph-logo" />
     </a>
-    <button
-      class="navbar-toggler"
-      type="button"
-      (click)="buttonsNav.toggle()"
-      aria-expanded="false"
-      aria-label="Toggle navigation"
-    >
+
+    <button class="navbar-toggler ph-toggler" type="button" (click)="buttonsNav.toggle()" aria-label="Menú">
       <i class="fas fa-bars"></i>
     </button>
-    <div
-      class="collapse navbar-collapse"
-      id="navbarButtonsExample"
-      mdbCollapse
-      #buttonsNav="mdbCollapse"
-    >
-      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+
+    <div class="collapse navbar-collapse" mdbCollapse #buttonsNav="mdbCollapse">
+
+      <!-- Logueado -->
+      <ul class="navbar-nav ms-auto align-items-lg-center" *ngIf="logueado">
+
         <li class="nav-item">
-          <div *ngIf="logueado">
-            <a class="nav-link" href="/home/alta">Inicio</a>
-          </div>
-          <div *ngIf="!logueado">
-            <a class="nav-link" href="/login">Inicio</a>
-          </div>
+          <a class="nav-link ph-link"
+             [routerLink]="'/home/alta'"
+             routerLinkActive="ph-active"
+             [routerLinkActiveOptions]="{exact: true}">
+            <i class="fas fa-plus"></i>
+            <span>Nuevo trabajo</span>
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link ph-link"
+             [routerLink]="'/home/listado'"
+             routerLinkActive="ph-active"
+             [routerLinkActiveOptions]="{exact: true}">
+            <i class="fas fa-briefcase"></i>
+            <span>Trabajos</span>
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link ph-link"
+             [routerLink]="'/home/presupuestos'"
+             routerLinkActive="ph-active">
+            <i class="fas fa-file-invoice"></i>
+            <span>Presupuestos</span>
+          </a>
+        </li>
+
+        <li class="ph-vsep d-none d-lg-flex"></li>
+
+        <!-- Clientes dropdown -->
+        <li class="nav-item" mdbDropdown>
+          <a class="nav-link ph-link" mdbDropdownToggle role="button">
+            <i class="fas fa-users"></i>
+            <span>Clientes</span>
+            <i class="fas fa-chevron-down ph-caret"></i>
+          </a>
+          <ul mdbDropdownMenu class="dropdown-menu ph-dropdown">
+            <li>
+              <a class="dropdown-item ph-drop-item" [routerLink]="'/home/listadoC'">
+                <i class="fas fa-list-ul"></i>
+                Ver clientes
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item ph-drop-item" [routerLink]="'/home/altaC'">
+                <i class="fas fa-user-plus"></i>
+                Nuevo cliente
+              </a>
+            </li>
+          </ul>
+        </li>
+
+        <!-- Admin dropdown -->
+        <li class="nav-item" *ngIf="esAdmin" mdbDropdown>
+          <a class="nav-link ph-link" mdbDropdownToggle role="button">
+            <i class="fas fa-cog"></i>
+            <span>Admin</span>
+            <i class="fas fa-chevron-down ph-caret"></i>
+          </a>
+          <ul mdbDropdownMenu class="dropdown-menu ph-dropdown dropdown-menu-end">
+            <li>
+              <a class="dropdown-item ph-drop-item" [routerLink]="'/home/caja'">
+                <i class="fas fa-cash-register"></i>
+                Caja
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item ph-drop-item" [routerLink]="'/home/graficos'">
+                <i class="fas fa-chart-bar"></i>
+                Gráficos
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item ph-drop-item" [routerLink]="'/home/cuentas'">
+                <i class="fas fa-university"></i>
+                Cuentas
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item ph-drop-item" [routerLink]="'/home/tabla'">
+                <i class="fas fa-table"></i>
+                Tabla
+              </a>
+            </li>
+            <li><hr class="dropdown-divider ph-drop-divider"></li>
+            <li>
+              <a class="dropdown-item ph-drop-item" [routerLink]="'/home/auditoria'">
+                <i class="fas fa-clipboard-list"></i>
+                Auditoría
+              </a>
+            </li>
+          </ul>
+        </li>
+
+        <li class="ph-vsep d-none d-lg-flex"></li>
+
+        <li class="nav-item">
+          <button class="btn ph-btn-logout" (click)="logOut()">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Salir</span>
+          </button>
         </li>
       </ul>
 
-      <div class="d-flex align-items-center">
-        <div *ngIf="logueado">
-          <button
-            *ngIf="esAdmin"
-            type="button"
-            class="btn btn-link px-3 me-2"
-            (click)="goTo('home/tabla')"
-          >
-            tabla
-          </button>
-          <button
-            *ngIf="esAdmin"
-            type="button"
-            class="btn btn-link px-3 me-2"
-            (click)="goTo('home/caja')"
-          >
-            caja
-          </button>
-          <button
-            *ngIf="esAdmin"
-            type="button"
-            class="btn btn-link px-3 me-2"
-            (click)="goTo('home/graficos')"
-          >
-            Graficos
-          </button>
-          <button
-            type="button"
-            class="btn btn-link text-success px-3 me-2"
-            (click)="goTo('home/presupuestos')"
-          >
-            presupuestos
-          </button>
-
-          <button
-            *ngIf="esAdmin"
-            type="button"
-            class="btn btn-link text-success px-3 me-2"
-            (click)="goTo('home/cuentas')"
-          >
-            Alta Cuentas
-          </button>
-
-          <button
-            type="button"
-            class="btn btn-link text-danger px-3 me-2"
-            (click)="goTo('home/listadoC')"
-          >
-            clientes
-          </button>
-          <button
-            type="button"
-            class="btn btn-link text-danger px-3 me-2"
-            (click)="goTo('home/altaC')"
-          >
-            Cargar cliente
-          </button>
-          <button
-            type="button"
-            class="btn btn-link px-3 me-2"
-            (click)="goTo('home/listado')"
-          >
-            Trabajos
-          </button>
-          <button
-            type="button"
-            class="btn btn-link px-3 me-2"
-            (click)="goTo('home/alta')"
-          >
-            Cargar trabajos
-          </button>
-
-          <button type="button" class="btn btn-danger me-3" (click)="logOut()">
-            cerrar sesion
-          </button>
-        </div>
-        <div *ngIf="!logueado">
-          <button
-            type="button"
-            class="btn btn-link px-3 me-2"
-            (click)="goTo('login')"
-          >
+      <!-- No logueado -->
+      <ul class="navbar-nav ms-auto align-items-lg-center gap-2" *ngIf="!logueado">
+        <li class="nav-item">
+          <a class="nav-link ph-link" [routerLink]="'/login'" routerLinkActive="ph-active">
             Iniciar sesión
+          </a>
+        </li>
+        <li class="nav-item">
+          <button class="btn ph-btn-register" (click)="goTo('register')">
+            Registrarse
           </button>
-          <button
-            type="button"
-            class="btn btn-primary me-3"
-            (click)="goTo('register')"
-          >
-            Registrarse gratis
-          </button>
-        </div>
-      </div>
+        </li>
+      </ul>
+
     </div>
   </div>
 </nav>

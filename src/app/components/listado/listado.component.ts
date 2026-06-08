@@ -1,6 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { FirebaseService } from 'src/app/servicesAndUtils/firebase.service';
-import { AuthService } from 'src/app/servicesAndUtils/auth.service';
+import { AdminService } from 'src/app/servicesAndUtils/admin.service';
 import { ModalComponent } from '../modals/modal/modal.component';
 import { MdbModalService } from 'mdb-angular-ui-kit/modal';
 import { ConfirmationService } from 'src/app/servicesAndUtils/confirmation.service';
@@ -8,6 +10,7 @@ import { ModalDeleteComponent } from '../modals/modal-delete/modal-delete.compon
 import { ModalPagoComponent } from '../modals/modal-pago/modal-pago.component';
 import { ModalComentarioComponent } from '../modals/modal-comentario/modal-comentario.component';
 import { ModalComprobanteComponent } from '../modals/modal-comprobante/modal-comprobante.component';
+import { ModalHistorialComponent } from '../modals/modal-historial/modal-historial.component';
 import * as pdfMake from 'pdfmake/build/pdfmake';
 import * as pdfFonts from 'pdfmake/build/vfs_fonts';
 import { Laburo } from 'src/app/clases/laburo';
@@ -18,14 +21,15 @@ import { Laburo } from 'src/app/clases/laburo';
   templateUrl: './listado.component.html',
   styleUrls: ['./listado.component.scss'],
 })
-export class ListadoComponent {
+export class ListadoComponent implements OnDestroy {
+  private destroy$ = new Subject<void>();
   laburos: any[] = [];
+  private laburosMap = new Map<string, any>();
   cuentas: any[] = [];
   filteredLaburos: any[] = [];
   searchTerm: string = '';
   esAdmin: boolean = false;
   loading: boolean = false;
-  admins: any[] = [];
   ultimoDoc: any = null;
   laburosPorPagina: number = 25;
   clientesMap: { [id: string]: any } = {};
@@ -44,16 +48,18 @@ export class ListadoComponent {
   };
 
   orderType: string = this.OrderType.Fecha;
+  filtroEstado: 'todos' | 'pendiente' | 'con-sena' | 'pagado' = 'todos';
   constructor(
     private firebase: FirebaseService,
-    private authService: AuthService,
+    private adminService: AdminService,
     private modalService: MdbModalService,
     private confirmationService: ConfirmationService
   ) {}
 
   async ngOnInit(): Promise<void> {
     this.loading = true;
-    await this.verificar();
+    await this.adminService.inicializar();
+    this.esAdmin = this.adminService.getEsAdminSnapshot();
     await this.initializeData();
     await this.subscribeToConfirmationEvents();
     this.sortLaburos();
@@ -66,14 +72,20 @@ export class ListadoComponent {
     await this.loadLaburos();
   }
 
-  private async reloasdData(): Promise<void> {
+  private async reloadData(): Promise<void> {
     this.loading = true;
     this.laburos = [];
+    this.laburosMap.clear();
     this.filteredLaburos = [];
     this.ultimoDoc = null;
     await this.loadLaburos();
     this.sortLaburos();
     this.loading = false;
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   private async loadCuentas(): Promise<void> {
@@ -98,13 +110,11 @@ export class ListadoComponent {
       this.ultimoDoc
     );
 
-    const newLaburos = result.data.filter((laburo: any) => {
-      return !this.laburos.some(
-        (existingLaburo) => existingLaburo.id === laburo.id
-      );
+    // Map garantiza unicidad y toma siempre la versión más reciente del documento
+    result.data.forEach((laburo: any) => {
+      this.laburosMap.set(laburo.id, laburo);
     });
-
-    this.laburos = [...this.laburos, ...newLaburos];
+    this.laburos = Array.from(this.laburosMap.values());
 
     this.filteredLaburos = this.laburos.map((laburo) =>
       this.transformLaburo(laburo)
@@ -132,29 +142,35 @@ export class ListadoComponent {
   }
 
   private async subscribeToConfirmationEvents(): Promise<void> {
-    this.confirmationService.getConfirmationState().subscribe(async (state) => {
-      if (state) {
-        await this.reloasdData();
-      }
-    });
+    this.confirmationService.getConfirmationState()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(async (state) => {
+        if (state) {
+          await this.reloadData();
+        }
+      });
 
-    this.confirmationService.getDeleteEvent().subscribe(async () => {
-      await this.reloasdData();
-    });
+    this.confirmationService.getDeleteEvent()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(async () => {
+        await this.reloadData();
+      });
 
-    this.confirmationService.getAddPagoEvent().subscribe(async () => {
-      await this.reloasdData();
-    });
+    this.confirmationService.getAddPagoEvent()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(async () => {
+        await this.reloadData();
+      });
 
-    this.confirmationService.getAddComentarioEvent().subscribe(async () => {
-      await this.reloasdData();
-    });
+    this.confirmationService.getAddComentarioEvent()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(async () => {
+        await this.reloadData();
+      });
   }
 
-  async verificar() {
-    this.admins = await this.firebase.obtener('admins');
-    const uid = this.authService.getCurrentUid();
-    this.esAdmin = this.admins.some((admin) => admin.data.id === uid);
+  verHistorial(laburo: any) {
+    this.modalService.open(ModalHistorialComponent, { data: { laburo } });
   }
 
   getCuentaNameById(id: string): string {
@@ -272,28 +288,43 @@ export class ListadoComponent {
   }
 
   search() {
-    const baseLaburos = this.laburos.map((laburo) => this.transformLaburo(laburo));
+    let result = this.laburos.map((laburo) => this.transformLaburo(laburo));
 
-    if (!this.searchTerm) {
-      this.filteredLaburos = baseLaburos;
-      this.sortLaburos();
-      return;
+    if (this.searchTerm) {
+      const term = this.searchTerm.toLowerCase();
+      result = result.filter((laburo) => {
+        const dataValues = Object.values(laburo.data || {})
+          .filter(Boolean)
+          .map((v: any) => v.toString().toLowerCase())
+          .join(' ');
+        const clienteValues = this.getClienteSearchText(laburo.data?.clienteInfo);
+        return dataValues.includes(term) || clienteValues.includes(term);
+      });
     }
 
-    const term = this.searchTerm.toLowerCase();
+    if (this.filtroEstado !== 'todos') {
+      result = result.filter((l) => this.getEstadoPago(l) === this.filtroEstado);
+    }
 
-    this.filteredLaburos = baseLaburos.filter((laburo) => {
-      const dataValues = Object.values(laburo.data || {})
-        .filter(Boolean)
-        .map((v: any) => v.toString().toLowerCase())
-        .join(' ');
-
-      const clienteValues = this.getClienteSearchText(laburo.data?.clienteInfo);
-
-      return dataValues.includes(term) || clienteValues.includes(term);
-    });
-
+    this.filteredLaburos = result;
     this.sortLaburos();
+  }
+
+  filtrar(estado: 'todos' | 'pendiente' | 'con-sena' | 'pagado') {
+    this.filtroEstado = estado;
+    this.search();
+  }
+
+  getEstadoPago(laburo: any): 'pendiente' | 'con-sena' | 'pagado' {
+    const d = laburo.data;
+    if (d.pago > 0 || d.pagoEfectivo > 0) return 'pagado';
+    if (d.sena > 0) return 'con-sena';
+    return 'pendiente';
+  }
+
+  countEstado(estado: string): number {
+    if (estado === 'todos') return this.laburos.length;
+    return this.laburos.filter((l) => this.getEstadoPago(l) === estado).length;
   }
 
   modificar(laburo: any) {

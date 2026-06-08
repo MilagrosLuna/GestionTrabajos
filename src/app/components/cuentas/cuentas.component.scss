@@ -1,0 +1,115 @@
+.listado-controls {
+  .form-control {
+    border-color: #ddd5c0 !important;
+    border-radius: 8px !important;
+    &:focus { border-color: var(--ph-gold) !important; }
+  }
+  .input-group-text {
+    border-color: #ddd5c0 !important;
+    background: #fff;
+    border-radius: 0 8px 8px 0 !important;
+  }
+}
+
+.cuenta-card {
+  border-radius: 12px !important;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+
+  &:hover { transform: translateY(-3px); }
+}
+
+// ── Approved ─────────────────────────────────────────────────────
+.cuenta-aprobada {
+  border: 1.5px solid rgba(201, 168, 76, 0.4) !important;
+  box-shadow: 0 4px 16px rgba(201, 168, 76, 0.18) !important;
+
+  &:hover { box-shadow: 0 8px 26px rgba(201, 168, 76, 0.3) !important; }
+}
+
+// ── Rejected ─────────────────────────────────────────────────────
+.cuenta-rechazada {
+  border: 1.5px solid rgba(192, 57, 43, 0.25) !important;
+  box-shadow: 0 2px 10px rgba(192, 57, 43, 0.1) !important;
+
+  &:hover { box-shadow: 0 6px 20px rgba(192, 57, 43, 0.18) !important; }
+}
+
+// ── Status bar ───────────────────────────────────────────────────
+.cuenta-status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 14px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+
+  .estado-label {
+    font-size: 0.68rem;
+    opacity: 0.65;
+    letter-spacing: 0.5px;
+  }
+}
+
+.bar-aprobado {
+  background: linear-gradient(90deg, rgba(154, 122, 26, 0.18), rgba(193, 125, 60, 0.1));
+  color: var(--ph-gold-dark, #9A7A1A);
+  border-bottom: 1px solid rgba(201, 168, 76, 0.2);
+}
+
+.bar-rechazado {
+  background: linear-gradient(90deg, rgba(192, 57, 43, 0.1), rgba(192, 57, 43, 0.05));
+  color: var(--ph-crimson, #C0392B);
+  border-bottom: 1px solid rgba(192, 57, 43, 0.15);
+}
+
+// ── Avatar icon ──────────────────────────────────────────────────
+.cuenta-avatar {
+  font-size: 2.5rem;
+  text-align: center;
+  margin-bottom: 0.5rem;
+  color: var(--ph-gold, #C9A84C);
+  opacity: 0.5;
+}
+
+.card-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  word-break: break-all;
+  color: var(--ph-dark, #2d2d2d);
+  margin-bottom: 0.3rem;
+}
+
+.cuenta-nombre {
+  font-size: 0.82rem;
+}
+
+// ── Toggle button ─────────────────────────────────────────────────
+.btn-cambiar-estado {
+  font-size: 0.82rem;
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 0.5rem;
+  border: none;
+  transition: all 0.2s ease;
+
+  .cuenta-aprobada & {
+    background: rgba(192, 57, 43, 0.1);
+    color: var(--ph-crimson, #C0392B);
+    border: 1px solid rgba(192, 57, 43, 0.3);
+    &:hover {
+      background: var(--ph-crimson);
+      color: #fff;
+    }
+  }
+
+  .cuenta-rechazada & {
+    background: linear-gradient(135deg, var(--ph-gold-dark, #9A7A1A), var(--ph-gold, #C9A84C));
+    color: var(--ph-black, #0A0A0A);
+    &:hover {
+      box-shadow: 0 4px 14px rgba(201, 168, 76, 0.45);
+    }
+  }
+}

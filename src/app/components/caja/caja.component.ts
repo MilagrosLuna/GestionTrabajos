@@ -38,10 +38,6 @@ export class CajaComponent {
     this.calculateSaldo();
   }
 
-  // private async loadMovimientos(): Promise<void> {
-  //   this.movimientos = await this.firebase.obtener('movimientos');
-  // }
-
   private async loadMovimientos(): Promise<void> {
     this.movimientos = (await this.firebase.obtener('movimientos')).sort(
       (a, b) => {
@@ -50,7 +46,6 @@ export class CajaComponent {
         return dateB.getTime() - dateA.getTime();
       }
     );
-    console.log(this.movimientos);
   }
 
   private calculateSaldo(): void {

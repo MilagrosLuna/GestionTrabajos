@@ -41,7 +41,20 @@ export class ResetPasswordComponent {
           'Email enviado'
         );
       } catch (error: any) {
-        this.alerts.showErrorMessage(error.code);
+        switch (error.code) {
+          case 'auth/user-not-found':
+            this.alerts.showErrorMessage('No hay ninguna cuenta registrada con ese email.');
+            break;
+          case 'auth/invalid-email':
+            this.alerts.showErrorMessage('El email ingresado no es válido.');
+            break;
+          case 'auth/too-many-requests':
+            this.alerts.showErrorMessage('Demasiados intentos. Esperá unos minutos antes de reintentar.');
+            break;
+          default:
+            this.alerts.showErrorMessage('No se pudo enviar el email. Intentá de nuevo más tarde.');
+            break;
+        }
       }
     } else {
       this.alerts.showErrorMessage('Error: complete todos los datos.');

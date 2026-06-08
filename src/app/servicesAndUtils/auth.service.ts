@@ -18,18 +18,20 @@ import { FirebaseService } from './firebase.service';
 })
 export class AuthService {
   user$ = new BehaviorSubject<boolean>(false);
+  private unsubAprobacion: (() => void) | null = null;
 
   constructor(
     private auth: Auth,
     private router: Router,
     private firebase: FirebaseService
   ) {
+    this.migrarSesionLegacy();
     this.user$.next(this.isUserAuthenticatedSnapshot());
 
     onAuthStateChanged(this.auth, (user) => {
       if (user) {
         this.user$.next(true);
-        localStorage.setItem(
+        sessionStorage.setItem(
           'user',
           JSON.stringify({
             uid: user.uid,
@@ -37,17 +39,31 @@ export class AuthService {
             displayName: user.displayName ?? '',
           })
         );
+        this.iniciarEscuchaAprobacion(user.uid);
       } else {
         this.user$.next(false);
-        localStorage.removeItem('user');
+        sessionStorage.removeItem('user');
       }
     });
+  }
+
+  private migrarSesionLegacy(): void {
+    const legacyLogueado = localStorage.getItem('logueado');
+    const legacyUser = localStorage.getItem('user');
+    if (legacyLogueado) {
+      sessionStorage.setItem('logueado', legacyLogueado);
+      localStorage.removeItem('logueado');
+    }
+    if (legacyUser) {
+      sessionStorage.setItem('user', legacyUser);
+      localStorage.removeItem('user');
+    }
   }
 
   private getStoredUser():
     | { uid: string; email?: string | null; displayName?: string }
     | null {
-    const rawUser = localStorage.getItem('user');
+    const rawUser = sessionStorage.getItem('user');
 
     if (!rawUser) {
       return null;
@@ -57,7 +73,7 @@ export class AuthService {
       const storedUser = JSON.parse(rawUser);
       return storedUser?.uid ? storedUser : null;
     } catch {
-      localStorage.removeItem('user');
+      sessionStorage.removeItem('user');
       return null;
     }
   }
@@ -75,15 +91,15 @@ export class AuthService {
   }
 
   async register({ email, password, username, name }: any) {
-    try {
-      const userCredential = await createUserWithEmailAndPassword(
-        this.auth,
-        email,
-        password
-      );
-      const user = userCredential.user;
-      const displayName = username || name || '';
+    const userCredential = await createUserWithEmailAndPassword(
+      this.auth,
+      email,
+      password
+    );
+    const user = userCredential.user;
+    const displayName = username || name || '';
 
+    try {
       await updateProfile(user, { displayName });
       await sendEmailVerification(user);
 
@@ -94,13 +110,12 @@ export class AuthService {
         nombre: displayName,
       };
 
-      await this.firebase.guardar(userCopy, 'usuarios');
-      await signOut(this.auth);
-      this.user$.next(false);
+      await this.firebase.guardarConId(userCopy, 'usuarios', user.uid);
 
       return user;
-    } catch (error) {
-      throw error;
+    } finally {
+      await signOut(this.auth);
+      this.user$.next(false);
     }
   }
 
@@ -122,9 +137,24 @@ export class AuthService {
     return userCredential;
   }
 
+  iniciarEscuchaAprobacion(uid: string): void {
+    this.unsubAprobacion?.();
+    this.unsubAprobacion = this.firebase.escucharDocumento('usuarios', uid, (data) => {
+      if (data && data['aprobado'] === false && this.user$.value) {
+        this.logout();
+      }
+    });
+  }
+
+  private detenerEscuchaAprobacion(): void {
+    this.unsubAprobacion?.();
+    this.unsubAprobacion = null;
+  }
+
   async logout() {
-    localStorage.removeItem('user');
-    localStorage.removeItem('logueado');
+    this.detenerEscuchaAprobacion();
+    sessionStorage.removeItem('user');
+    sessionStorage.removeItem('logueado');
     await signOut(this.auth);
     this.user$.next(false);
     await this.router.navigate(['/login']);
