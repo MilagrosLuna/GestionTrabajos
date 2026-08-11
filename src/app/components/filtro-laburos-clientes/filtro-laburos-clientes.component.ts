@@ -19,11 +19,13 @@ export class FiltroLaburosClientesComponent implements OnInit {
   id: string | null = null;
   laburos: any[] = [];
   filteredLaburos: any[] = [];
+  displayedLaburos: any[] = [];
   cuentas: any[] = [];
   loading: boolean = true;
   esAdmin: boolean = false;
   cuentasMap: { [id: string]: string } = {};
   cliente: any = null;
+  filtroEstado: string = 'todos';
 
   constructor(
     private route: ActivatedRoute,
@@ -55,6 +57,7 @@ export class FiltroLaburosClientesComponent implements OnInit {
           this.filteredLaburos = this.laburos.map((laburo) =>
             this.transformLaburo(laburo)
           );
+          this.applyFiltroEstado();
         } catch {
           // silently ignore load errors — loading=false still runs in finally
         } finally {
@@ -91,6 +94,7 @@ export class FiltroLaburosClientesComponent implements OnInit {
         this.filteredLaburos = this.laburos.map((laburo) =>
           this.transformLaburo(laburo)
         );
+        this.applyFiltroEstado();
       } catch {
         // silently ignore reload errors
       } finally {
@@ -156,5 +160,31 @@ export class FiltroLaburosClientesComponent implements OnInit {
     const modalRef = this.modalService.open(ModalComprobanteComponent, {
       data: { laburo, pago },
     });
+  }
+
+  getEstadoPago(laburo: any): 'pagado' | 'con-sena' | 'pendiente' {
+    if (laburo.data.pago || laburo.data.pagoEfectivo) return 'pagado';
+    if (laburo.data.sena > 0) return 'con-sena';
+    return 'pendiente';
+  }
+
+  filtrar(estado: string): void {
+    this.filtroEstado = estado;
+    this.applyFiltroEstado();
+  }
+
+  countEstado(estado: string): number {
+    if (estado === 'todos') return this.filteredLaburos.length;
+    return this.filteredLaburos.filter(l => this.getEstadoPago(l) === estado).length;
+  }
+
+  private applyFiltroEstado(): void {
+    if (this.filtroEstado === 'todos') {
+      this.displayedLaburos = [...this.filteredLaburos];
+    } else {
+      this.displayedLaburos = this.filteredLaburos.filter(
+        l => this.getEstadoPago(l) === this.filtroEstado
+      );
+    }
   }
 }

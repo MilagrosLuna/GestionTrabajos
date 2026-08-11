@@ -41,14 +41,24 @@
           </p>
 
           <button
-            class="btn btn-cambiar-estado w-100"
+            class="btn btn-cambiar-estado w-100 mb-2"
             (click)="cambiarEstadoAprobacion(cuenta)"
-            [disabled]="cargandoAprobacion === cuenta.id"
+            [disabled]="cargandoAprobacion === cuenta.id || eliminando === cuenta.id"
           >
             <span *ngIf="cargandoAprobacion === cuenta.id" class="spinner-border spinner-border-sm me-2" role="status"></span>
             <i *ngIf="cargandoAprobacion !== cuenta.id" class="fas me-2"
                [ngClass]="{ 'fa-toggle-on': cuenta.data.aprobado, 'fa-toggle-off': !cuenta.data.aprobado }"></i>
             {{ cargandoAprobacion === cuenta.id ? 'Guardando...' : (cuenta.data.aprobado ? 'Rechazar acceso' : 'Aprobar acceso') }}
+          </button>
+
+          <button
+            class="btn btn-eliminar w-100"
+            (click)="eliminarCuenta(cuenta)"
+            [disabled]="eliminando === cuenta.id || cargandoAprobacion === cuenta.id"
+          >
+            <span *ngIf="eliminando === cuenta.id" class="spinner-border spinner-border-sm me-2" role="status"></span>
+            <i *ngIf="eliminando !== cuenta.id" class="fas fa-trash me-2"></i>
+            {{ eliminando === cuenta.id ? 'Eliminando...' : 'Eliminar cuenta' }}
           </button>
         </div>
 

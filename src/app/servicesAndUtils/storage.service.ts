@@ -41,11 +41,47 @@ export class StorageService {
 
   async guardarFoto(file: File, ruta: string) {
     this.validateFile(file);
-    const ext = file.name.split('.').pop()?.toLowerCase() ?? 'bin';
+
+    let uploadBlob: Blob = file;
+    let ext = file.name.split('.').pop()?.toLowerCase() ?? 'bin';
+
+    if (file.type !== 'application/pdf') {
+      try {
+        uploadBlob = await this.toWebp(file);
+        if (uploadBlob.type === 'image/webp') {
+          ext = 'webp';
+        }
+      } catch {
+        uploadBlob = file; // Si falla la compresión, subimos el archivo original
+      }
+    }
+
     const safeName = `${Date.now()}.${ext}`;
     const imgRef = ref(this.storage, `/${ruta}/${safeName}`);
-    await uploadBytes(imgRef, file);
+    await uploadBytes(imgRef, uploadBlob);
     return await getDownloadURL(imgRef);
+  }
+
+  // Convierte y reduce la imagen a WebP para que ocupe menos espacio en Storage
+  private async toWebp(file: File, maxDimension = 1920, quality = 0.82): Promise<Blob> {
+    const bitmap = await createImageBitmap(file);
+    const scale = Math.min(1, maxDimension / Math.max(bitmap.width, bitmap.height));
+    const width = Math.round(bitmap.width * scale);
+    const height = Math.round(bitmap.height * scale);
+
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    canvas.getContext('2d')!.drawImage(bitmap, 0, 0, width, height);
+    bitmap.close();
+
+    return new Promise<Blob>((resolve, reject) => {
+      canvas.toBlob(
+        (blob) => (blob ? resolve(blob) : reject(new Error('No se pudo comprimir la imagen'))),
+        'image/webp',
+        quality
+      );
+    });
   }
 
   private dataURLtoBlob(dataurl: any) {

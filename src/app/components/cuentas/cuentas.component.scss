@@ -113,3 +113,25 @@
     }
   }
 }
+
+.btn-eliminar {
+  font-size: 0.82rem;
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 0.5rem;
+  border: 1px solid rgba(192, 57, 43, 0.3);
+  background: transparent;
+  color: var(--ph-crimson, #C0392B);
+  transition: all 0.2s ease;
+
+  &:hover:not(:disabled) {
+    background: var(--ph-crimson, #C0392B);
+    color: #fff;
+    border-color: var(--ph-crimson, #C0392B);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}

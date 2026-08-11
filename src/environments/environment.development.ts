@@ -2,7 +2,7 @@ export const environment = {
   production: false,
   envName: 'dev',
   firebaseConfig: {
-    apiKey: 'AIzaSyDoX1AKBkBI6BgTiwcc3Kq2MmTdgDY5tSY',
+    apiKey: 'AIzaSyCgpyZtPRbDrbGijihQ2kMtQugwmxG2nvs',
     authDomain: 'phoenix-2e79a.firebaseapp.com',
     projectId: 'phoenix-2e79a',
     storageBucket: 'phoenix-2e79a.appspot.com',
