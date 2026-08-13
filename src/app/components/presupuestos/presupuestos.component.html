@@ -5,25 +5,91 @@
         <h4 class="text-center mb-1 pb-1">Presupuestos</h4>
         <form (ngSubmit)="onSubmit()" [formGroup]="form">
           <div class="m-3">
+            <input
+              mdbCheckbox
+              formControlName="esClienteAnonimo"
+              class="form-check-input"
+              type="checkbox"
+              id="esClienteAnonimo"
+            />
+            <label class="form-check-label" for="esClienteAnonimo">
+              Cliente no registrado
+            </label>
+          </div>
+
+          <div class="m-3">
             <mdb-form-control>
               <input
                 mdbInput
                 type="text"
-                id="cliente"
+                id="clienteName"
                 class="form-control"
-                formControlName="cliente"
+                formControlName="clienteName"
+                placeholder="Nombre del cliente"
               />
-              <label mdbLabel class="form-label" for="cliente">Cliente</label>
+              <label mdbLabel class="form-label" for="clienteName">
+                Nombre
+              </label>
             </mdb-form-control>
-            <div *ngIf="form.controls['cliente'].errors != null">
+
+            <div *ngIf="form.controls['clienteName'].errors != null">
               <small
                 class="invalid"
                 *ngIf="
-                  form.controls['cliente'].errors!['required'] &&
-                  form.controls['cliente'].touched
+                  (form.controls['clienteName'].errors!['required'] ||
+                    form.controls['clienteName'].errors!['whitespace']) &&
+                  form.controls['clienteName'].touched
                 "
-                >Debe ingresar el nombre del cliente.</small
               >
+                Debe ingresar el nombre del cliente.
+              </small>
+            </div>
+          </div>
+
+          <div *ngIf="!form.controls['esClienteAnonimo'].value">
+            <div class="m-3">
+              <button
+                type="button"
+                class="btn btn-info"
+                (click)="buscarCliente()"
+              >
+                Buscar Cliente
+              </button>
+            </div>
+
+            <div
+              *ngIf="clientesFiltered.length > 0"
+              class="dropdown-menu show w-90 m-3"
+            >
+              <button
+                type="button"
+                class="dropdown-item"
+                *ngFor="let cliente of clientesFiltered"
+                (click)="selectCliente(cliente)"
+              >
+                {{ cliente.data.nombre }} - {{ cliente.data.telefono }} -
+                {{ cliente.data.email }}
+              </button>
+            </div>
+
+            <div class="m-3">
+              <mdb-form-control>
+                <input
+                  mdbInput
+                  type="text"
+                  id="clienteInfo"
+                  class="form-control"
+                  [value]="selectedClienteInfo"
+                  placeholder="Cliente seleccionado"
+                  [readonly]="true"
+                />
+                <label readonly mdbLabel class="form-label" for="clienteInfo">
+                  Cliente seleccionado
+                </label>
+              </mdb-form-control>
+              <div *ngIf="form.controls['cliente'].invalid && form.controls['cliente'].touched">
+                <small class="invalid">Debe seleccionar un cliente.</small>
+              </div>
             </div>
           </div>
 
@@ -51,6 +117,30 @@
           </div>
 
           <div class="m-3">
+            <label class="form-label d-block mb-1">Tipo de detalle</label>
+            <div class="form-check form-check-inline">
+              <input
+                class="form-check-input"
+                type="radio"
+                formControlName="modoDetalle"
+                id="modoSimple"
+                value="simple"
+              />
+              <label class="form-check-label" for="modoSimple">Detalle simple</label>
+            </div>
+            <div class="form-check form-check-inline">
+              <input
+                class="form-check-input"
+                type="radio"
+                formControlName="modoDetalle"
+                id="modoItems"
+                value="items"
+              />
+              <label class="form-check-label" for="modoItems">Ítems con subtotal</label>
+            </div>
+          </div>
+
+          <div class="m-3" *ngIf="form.controls['modoDetalle'].value === 'simple'">
             <mdb-form-control>
               <textarea
                 mdbInput
@@ -72,7 +162,7 @@
             </div>
           </div>
 
-          <div class="m-3">
+          <div class="m-3" *ngIf="form.controls['modoDetalle'].value === 'simple'">
             <mdb-form-control>
               <input
                 mdbInput
@@ -93,6 +183,89 @@
                 >Debe ingresar un precio.</small
               >
             </div>
+          </div>
+
+          <div class="m-3" *ngIf="form.controls['modoDetalle'].value === 'items'" formArrayName="items">
+            <label class="form-label d-block mb-2">Ítems del presupuesto</label>
+
+            <div
+              *ngFor="let item of itemsArray.controls; let i = index"
+              [formGroupName]="i"
+              class="row g-2 align-items-start mb-2 pb-2 border-bottom"
+            >
+              <div class="col-12 col-md-5">
+                <input
+                  mdbInput
+                  type="text"
+                  class="form-control form-control-sm"
+                  formControlName="concepto"
+                  placeholder="Concepto"
+                  aria-label="Concepto del ítem"
+                />
+                <small
+                  class="invalid"
+                  *ngIf="item.get('concepto')?.invalid && item.get('concepto')?.touched"
+                >
+                  Ingrese un concepto.
+                </small>
+              </div>
+              <div class="col-4 col-md-2">
+                <input
+                  mdbInput
+                  type="number"
+                  class="form-control form-control-sm"
+                  formControlName="cantidad"
+                  placeholder="Cant."
+                  aria-label="Cantidad"
+                />
+              </div>
+              <div class="col-4 col-md-2">
+                <input
+                  mdbInput
+                  type="number"
+                  class="form-control form-control-sm"
+                  formControlName="precioUnitario"
+                  placeholder="P. unitario"
+                  aria-label="Precio unitario"
+                />
+              </div>
+              <div class="col-3 col-md-2 pt-2 text-end">
+                ${{ formatMoney(getSubtotal(i)) }}
+              </div>
+              <div class="col-1 pt-1 text-end">
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-danger"
+                  (click)="removeItem(i)"
+                  [disabled]="itemsArray.length <= 1"
+                  aria-label="Quitar ítem"
+                >
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </div>
+
+            <button type="button" class="btn btn-sm btn-outline-secondary mt-1" (click)="addItem()">
+              + Agregar ítem
+            </button>
+
+            <div class="text-end mt-3 pe-1">
+              <strong>Total: ${{ formatMoney(getTotalItems()) }}</strong>
+            </div>
+          </div>
+
+          <div class="m-3" *ngIf="form.controls['modoDetalle'].value === 'items'">
+            <mdb-form-control>
+              <textarea
+                mdbInput
+                id="comentarios"
+                class="form-control"
+                formControlName="comentarios"
+              ></textarea>
+              <label mdbLabel class="form-label" for="comentarios">
+                Comentarios (opcional)
+              </label>
+            </mdb-form-control>
           </div>
 
           <div class="text-center pt-1 mb-1 pb-1">
@@ -120,10 +293,14 @@
       >
         <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
           <div>
-            <strong>N° {{ p.data.numero }}</strong> – {{ p.data.cliente }}
+            <strong>N° {{ p.data.numero }}</strong> –
+            {{ p.data.clienteInfo?.nombre || p.data.cliente || 'Sin cliente' }}
+            <span *ngIf="p.data.clienteInfo as ci" class="text-muted">
+              ({{ ci.telefono || ci.email }})
+            </span>
             <br />
             <small class="text-muted">
-              {{ p.data.fecha | date : "dd/MM/yyyy" }} – ${{ p.data.precio }}
+              {{ p.data.fecha | date : "dd/MM/yyyy" }} – ${{ formatMoney(p.data.precio) }}
             </small>
             <br />
             <span [ngClass]="getEstadoInfo(p.data.estado).clase" class="mt-1 d-inline-block">
