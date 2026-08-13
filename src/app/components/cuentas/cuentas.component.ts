@@ -46,8 +46,10 @@ export class CuentasComponent {
       cuenta.data.aprobado = !cuenta.data.aprobado;
       await this.firebase.modificar(cuenta, 'usuarios');
       await this.initializeData();
-    } catch {
+    } catch (err: any) {
       cuenta.data.aprobado = !cuenta.data.aprobado;
+      console.error('[DEBUG] cambiarEstadoAprobacion ERROR:', err);
+      this.alerts.showErrorMessage(err?.message ?? 'No se pudo cambiar el estado de la cuenta.');
     } finally {
       this.cargandoAprobacion = null;
     }

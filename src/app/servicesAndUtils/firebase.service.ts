@@ -114,7 +114,9 @@ export class FirebaseService {
       const contadorActual = Number(contadorSnap.data()?.['contador']) || 0;
       const siguienteContador = contadorActual + 1;
 
-      transaction.update(contadorRef, { contador: siguienteContador });
+      // set con merge en vez de update: crea el documento la primera vez
+      // (proyecto nuevo, contador todavia no existe) y lo actualiza si ya existe.
+      transaction.set(contadorRef, { contador: siguienteContador }, { merge: true });
       return siguienteContador;
     });
   }

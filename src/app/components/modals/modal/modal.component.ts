@@ -33,8 +33,36 @@ export class ModalComponent {
   async ngOnInit(): Promise<void> {
     this.originalLaburo = JSON.parse(JSON.stringify(this.laburo));
     this.laburoCopy = JSON.parse(JSON.stringify(this.laburo));
+    // fecha/fechaEntrega se guardan como Date -> quedan serializadas como ISO
+    // completo (ej. "2026-08-11T03:00:00.000Z"). <input type="date"> solo
+    // acepta "yyyy-MM-dd".
+    this.laburoCopy.data.fecha = this.toDateInputValue(this.laburoCopy.data.fecha);
+    this.laburoCopy.data.fechaEntrega = this.toDateInputValue(this.laburoCopy.data.fechaEntrega);
     this.cuentas = await this.firebase.obtener('cuentas');
     this.selectedCuentaId = this.laburoCopy?.data?.cuenta;
+  }
+
+  private toDateInputValue(value: any): string {
+    if (!value) return '';
+    let d: Date;
+    if (value instanceof Date) {
+      d = value;
+    } else if (typeof value?.toDate === 'function') {
+      d = value.toDate(); // Firestore Timestamp
+    } else if (typeof value?.seconds === 'number') {
+      d = new Date(value.seconds * 1000); // Timestamp serializado {seconds, nanoseconds}
+    } else {
+      d = new Date(value); // string (ISO o yyyy-MM-dd)
+    }
+    if (isNaN(d.getTime())) return '';
+    const month = (d.getMonth() + 1).toString().padStart(2, '0');
+    const day = d.getDate().toString().padStart(2, '0');
+    return `${d.getFullYear()}-${month}-${day}`;
+  }
+
+  private toLocalDate(dateValue: string): Date {
+    const [year, month, day] = dateValue.split('-').map(Number);
+    return new Date(year, month - 1, day);
   }
 
   async confirmar() {
@@ -95,6 +123,8 @@ export class ModalComponent {
     }
 
     const datoAnterior = this.originalLaburo.data;
+    this.laburoCopy.data.fecha = this.toLocalDate(this.laburoCopy.data.fecha);
+    this.laburoCopy.data.fechaEntrega = this.toLocalDate(this.laburoCopy.data.fechaEntrega);
     this.laburo = { ...this.laburoCopy };
 
     await this.firebase.modificar(this.laburo, 'laburos');

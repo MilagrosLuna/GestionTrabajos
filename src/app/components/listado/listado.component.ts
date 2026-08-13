@@ -524,8 +524,7 @@ export class ListadoComponent implements OnDestroy {
         ...generarContenido(),
         {
           text: [
-            'Las se\u00f1as no se reembolsar\u00e1n en caso de desistimiento del pedido, o si el trabajo ya est\u00e1 en proceso de impresi\u00f3n o armado.\n',
-            'En caso de no haberse realizado el dise\u00f1o, se podr\u00e1 devolver la se\u00f1a descontando el costo correspondiente al dise\u00f1o.\n',
+            'Las se\u00f1as no se reembolsar\u00e1n en caso de desistimiento del pedido si el trabajo ya est\u00e1 en proceso de impresi\u00f3n o armado.\n',
             'Las fechas de entrega son estimadas y pueden variar seg\u00fan la carga de trabajo u otros factores externos.\n',
           ],
           fontSize: 9,

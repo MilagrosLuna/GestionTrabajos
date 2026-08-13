@@ -1,6 +1,12 @@
  import { Injectable } from '@angular/core';
+import { Auth } from '@angular/fire/auth';
+// Las funciones se importan de 'firebase/auth' (no '@angular/fire/auth') a
+// proposito: @angular/fire envuelve estas funciones (zoneWrap) y eso puede
+// dejar el estado de credenciales sin terminar de propagarse antes de que
+// resuelva la promesa, causando que escrituras a Firestore inmediatamente
+// posteriores se queden esperando un token que nunca llega. La instancia de
+// Auth sigue siendo la misma (inyectada via DI), solo cambian las funciones.
 import {
-  Auth,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
@@ -8,7 +14,7 @@ import {
   updateProfile,
   sendEmailVerification,
   sendPasswordResetEmail,
-} from '@angular/fire/auth';
+} from 'firebase/auth';
 import { Router } from '@angular/router';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { FirebaseService } from './firebase.service';
@@ -28,7 +34,7 @@ export class AuthService {
     this.migrarSesionLegacy();
     this.user$.next(this.isUserAuthenticatedSnapshot());
 
-    onAuthStateChanged(this.auth, (user) => {
+    onAuthStateChanged(this.auth, async (user) => {
       if (user) {
         this.user$.next(true);
         sessionStorage.setItem(
@@ -39,7 +45,27 @@ export class AuthService {
             displayName: user.displayName ?? '',
           })
         );
-        this.iniciarEscuchaAprobacion(user.uid);
+        // Solo arrancar el listener de revocacion si la cuenta YA esta
+        // aprobada (leido del servidor, no de la cache optimista local).
+        // Si se arranca sin este chequeo, el listener queda escuchando un
+        // documento que todavia no existe; cuando el propio registro/login
+        // crea ese documento (con aprobado:false, porque recien se esta
+        // dando de alta), Firestore aplica el write de forma optimista en
+        // la cache local al instante, el listener lo ve, y se autodesloguea
+        // a mitad de su propio alta (dejando ese write colgado para
+        // siempre, sin poder confirmarse contra el servidor).
+        try {
+          const doc = await this.firebase.obtenerUno('usuarios', user.uid);
+          // Verificar que sigue siendo el mismo usuario despues del await
+          // (evita arrancar el listener de un usuario viejo si hubo un
+          // logout/login rapido mientras se esperaba esta lectura).
+          if (this.auth.currentUser?.uid !== user.uid) return;
+          if (doc?.data?.['aprobado'] === true) {
+            this.iniciarEscuchaAprobacion(user.uid);
+          }
+        } catch {
+          // sin acceso todavia (p. ej. recien registrado) - no arrancar el listener
+        }
       } else {
         this.user$.next(false);
         sessionStorage.removeItem('user');
