@@ -1,5 +1,6 @@
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { Subject, of } from 'rxjs';
 import { MdbModalService } from 'mdb-angular-ui-kit/modal';
 import { ListadoComponent } from './listado.component';
@@ -36,6 +37,7 @@ describe('ListadoComponent', () => {
     confirmationSubject = new Subject<boolean>();
 
     TestBed.configureTestingModule({
+      imports: [HttpClientTestingModule],
       declarations: [ListadoComponent],
       providers: [
         { provide: FirebaseService, useValue: firebaseSpy },

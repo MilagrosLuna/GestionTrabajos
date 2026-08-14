@@ -11,6 +11,7 @@ import { ModalPagoComponent } from '../modals/modal-pago/modal-pago.component';
 import { ModalComentarioComponent } from '../modals/modal-comentario/modal-comentario.component';
 import { ModalComprobanteComponent } from '../modals/modal-comprobante/modal-comprobante.component';
 import { ModalHistorialComponent } from '../modals/modal-historial/modal-historial.component';
+import { HttpClient } from '@angular/common/http';
 import * as pdfMake from 'pdfmake/build/pdfmake';
 import * as pdfFonts from 'pdfmake/build/vfs_fonts';
 import { Laburo } from 'src/app/clases/laburo';
@@ -53,7 +54,8 @@ export class ListadoComponent implements OnDestroy {
     private firebase: FirebaseService,
     private adminService: AdminService,
     private modalService: MdbModalService,
-    private confirmationService: ConfirmationService
+    private confirmationService: ConfirmationService,
+    private http: HttpClient
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -262,29 +264,88 @@ export class ListadoComponent implements OnDestroy {
     );
   }
 
-  private buildPagoDetalle(
-    titulo: string,
-    monto: number,
-    caja: string,
-    cuentaId?: string,
-    cuentaNombre?: string
-  ): string[] {
-    if (!monto) {
-      return [];
-    }
+  private buildPagosFilas(
+    data: any
+  ): { concepto: string; monto: number; metodo: string; cuenta: string }[] {
+    const filas: { concepto: string; monto: number; metodo: string; cuenta: string }[] = [];
 
-    const detalle = [
-      `${titulo}: $${this.formatMoney(monto)}`,
-      `Metodo de pago: ${this.getMetodoPagoLabel(caja)}`,
+    const agregar = (
+      concepto: string,
+      monto: number,
+      caja: string,
+      cuentaId?: string,
+      cuentaNombre?: string
+    ) => {
+      if (!monto) return;
+      filas.push({
+        concepto,
+        monto,
+        metodo: this.getMetodoPagoLabel(caja),
+        cuenta: caja === 'transferencia' ? this.getCuentaDetalle(cuentaId, cuentaNombre) : '—',
+      });
+    };
+
+    agregar('Seña', data.sena || 0, data.cajaSena, data.cuentaSena, data.cuentaNombreSena);
+    agregar(
+      'Pago final',
+      data.pago || 0,
+      data.cajaFinal || 'transferencia',
+      data.cuentaFinal,
+      data.cuentaNombreFinal
+    );
+    agregar('Pago final', data.pagoEfectivo || 0, data.cajaFinalEfectivo || 'efectivo');
+
+    return filas;
+  }
+
+  private buildPagosTable(
+    filas: { concepto: string; monto: number; metodo: string; cuenta: string }[]
+  ): any {
+    const body = [
+      [
+        { text: 'CONCEPTO', style: 'tableHeader' },
+        { text: 'MÉTODO', style: 'tableHeader' },
+        { text: 'CUENTA', style: 'tableHeader' },
+        { text: 'MONTO', style: 'tableHeader', alignment: 'right' },
+      ],
+      ...filas.map((f) => [
+        { text: f.concepto, style: 'tableCell' },
+        { text: f.metodo, style: 'tableCell' },
+        { text: f.cuenta, style: 'tableCell' },
+        { text: `$${this.formatMoney(f.monto)}`, style: 'tableCell', bold: true, alignment: 'right' },
+      ]),
     ];
 
-    if (caja === 'transferencia') {
-      detalle.push(
-        `Cuenta: ${this.getCuentaDetalle(cuentaId, cuentaNombre)}`
-      );
-    }
+    return {
+      table: { widths: ['*', 'auto', 'auto', 'auto'], body },
+      layout: {
+        hLineWidth: (i: number, node: any) =>
+          i === 0 || i === 1 || i === node.table.body.length ? 1 : 0.5,
+        vLineWidth: () => 0,
+        hLineColor: () => '#E6E1D3',
+        paddingLeft: (i: number) => (i === 0 ? 0 : 8),
+        paddingRight: () => 0,
+        paddingTop: () => 5,
+        paddingBottom: () => 5,
+      },
+      margin: [0, 0, 0, 18],
+    };
+  }
 
-    return detalle;
+  convertImageToBase64(imagen: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+      this.http.get(imagen, { responseType: 'blob' }).subscribe((blob) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const base64data = reader.result;
+          resolve(base64data as string);
+        };
+        reader.onerror = () => {
+          reject('Error al leer la imagen');
+        };
+        reader.readAsDataURL(blob);
+      }, reject);
+    });
   }
 
   search() {
@@ -403,6 +464,7 @@ export class ListadoComponent implements OnDestroy {
   }
 
   async createPDF(laburo: any) {
+    const imagen = await this.convertImageToBase64('../assets/a.jpeg');
     let laburoCopy = JSON.parse(JSON.stringify(laburo));
     let now = new Date();
     let fechaEmision = `${now.getDate().toString().padStart(2, '0')}/${(
@@ -420,13 +482,15 @@ export class ListadoComponent implements OnDestroy {
     if (!laburoCopy.data.numero) {
       laburoCopy.data.numero = 0;
     }
-    if (!laburoCopy.data.comentario || laburoCopy.data.comentario === '') {
-      laburoCopy.data.comentario = '---';
-    }
 
     if (laburoCopy.data.clienteid && laburoCopy.data.clienteInfo?.nombre) {
       laburoCopy.data.cliente = laburoCopy.data.clienteInfo.nombre;
     }
+
+    const clienteInfo = laburoCopy.data.clienteInfo;
+    const clienteContacto = [clienteInfo?.telefono, clienteInfo?.email]
+      .filter(Boolean)
+      .join('  \u00b7  ');
 
     const precioTotal = laburoCopy.data.precio || 0;
     const senia = laburoCopy.data.sena || 0;
@@ -434,118 +498,209 @@ export class ListadoComponent implements OnDestroy {
     const pagoEfectivo = laburoCopy.data.pagoEfectivo || 0;
     const totalAbonado = senia + pagoTransferencia + pagoEfectivo;
     const saldoPendiente = Math.max(precioTotal - totalAbonado, 0);
-    const estadoPago =
-      saldoPendiente <= 0
-        ? 'PAGADO EN SU TOTALIDAD'
-        : `Saldo pendiente: $${this.formatMoney(saldoPendiente)}`;
+    const pagado = saldoPendiente <= 0;
 
-    const detallePagos = [
-      ...this.buildPagoDetalle(
-        'Se\u00f1a',
-        senia,
-        laburoCopy.data.cajaSena,
-        laburoCopy.data.cuentaSena,
-        laburoCopy.data.cuentaNombreSena
-      ),
-      ...this.buildPagoDetalle(
-        'Pago final por transferencia',
-        pagoTransferencia,
-        laburoCopy.data.cajaFinal || 'transferencia',
-        laburoCopy.data.cuentaFinal,
-        laburoCopy.data.cuentaNombreFinal
-      ),
-      ...this.buildPagoDetalle(
-        'Pago final en efectivo',
-        pagoEfectivo,
-        laburoCopy.data.cajaFinalEfectivo || 'efectivo'
-      ),
-    ];
-
-    const detallePagosTexto = detallePagos.length
-      ? detallePagos.join('\n')
-      : 'Sin pagos registrados';
+    const filasPago = this.buildPagosFilas(laburoCopy.data);
     const fechaLaburoTexto = this.formatDisplayDate(laburoCopy.data.fecha);
     const fechaEntregaTexto = this.formatDisplayDate(
       laburoCopy.data.fechaEntrega
     );
+    const comentario = (laburoCopy.data.comentario ?? '').toString().trim();
 
-    const generarContenido = () => [
+    const buildCopyFlag = (etiqueta: string): any => ({
+      columns: [
+        {
+          width: 'auto',
+          table: {
+            body: [
+              [
+                {
+                  text: etiqueta,
+                  color: '#fff',
+                  fillColor: '#C0392B',
+                  bold: true,
+                  fontSize: 8,
+                  margin: [8, 3, 8, 3],
+                },
+              ],
+            ],
+          },
+          layout: { hLineWidth: () => 0, vLineWidth: () => 0 },
+        },
+      ],
+      margin: [0, 4, 0, 8],
+    });
+
+    const generarContenido = (etiquetaCopia: string) => [
+      buildCopyFlag(etiquetaCopia),
       {
-        text: `Orden de impresi\u00f3n laburo N\u00b0: ${laburoCopy.data.numero}`,
-        fontSize: 20,
-        margin: [0, 5, 0, 0],
+        text: [
+          { text: 'Orden de impresi\u00f3n  ', style: 'docTitle' },
+          { text: `N\u00b0 ${laburoCopy.data.numero}`, style: 'docNumber' },
+        ],
+      },
+      { text: `Emitida el ${fechaEmision}`, style: 'metaText', margin: [0, 4, 0, 0] },
+      {
+        canvas: [
+          { type: 'line', x1: 0, y1: 0, x2: 515, y2: 0, lineWidth: 1.4, lineColor: '#C0392B' },
+        ],
+        margin: [0, 12, 0, 16],
       },
       {
-        text: `Fecha de emisi\u00f3n: ${fechaEmision}`,
-        fontSize: 16,
-        margin: [0, 5, 0, 0],
+        columns: [
+          {
+            width: '*',
+            stack: [
+              { text: 'CLIENTE', style: 'label' },
+              { text: laburoCopy.data.cliente || 'Consumidor final', style: 'value' },
+              ...(clienteContacto ? [{ text: clienteContacto, style: 'subValue' }] : []),
+            ],
+          },
+          {
+            width: 'auto',
+            stack: [
+              { text: 'FECHA', style: 'label', alignment: 'right' },
+              { text: fechaLaburoTexto, style: 'value', alignment: 'right' },
+            ],
+          },
+          {
+            width: 'auto',
+            stack: [
+              { text: 'ENTREGA', style: 'label', alignment: 'right' },
+              { text: fechaEntregaTexto, style: 'value', alignment: 'right' },
+            ],
+          },
+        ],
+        columnGap: 16,
+        margin: [0, 0, 0, 18],
       },
       {
-        text: `-------------------------------------------------------------------------------------------------------------------`,
-        fontSize: 16,
-        margin: [0, 10, 0, 0],
+        table: {
+          widths: ['*'],
+          body: [
+            [
+              {
+                stack: [
+                  { text: 'TRABAJO', style: 'label' },
+                  {
+                    text: laburoCopy.data.trabajo || 'Sin especificar',
+                    style: 'jobTitle',
+                    margin: [0, 3, 0, 0],
+                  },
+                  ...(laburoCopy.data.detalle
+                    ? [{ text: laburoCopy.data.detalle, style: 'detailText', margin: [0, 3, 0, 0] }]
+                    : []),
+                ],
+                fillColor: '#F5F0E6',
+                margin: [14, 12, 14, 12],
+              },
+            ],
+          ],
+        },
+        layout: {
+          hLineWidth: () => 0,
+          vLineWidth: (i: number) => (i === 0 ? 3 : 0),
+          vLineColor: () => '#C9A84C',
+        },
+        margin: [0, 0, 0, 18],
+      },
+      ...(filasPago.length
+        ? [
+            { text: 'DETALLE DE PAGOS', style: 'label', margin: [0, 0, 0, 6] },
+            this.buildPagosTable(filasPago),
+          ]
+        : []),
+      ...(comentario
+        ? [
+            { text: 'COMENTARIOS', style: 'label', margin: [0, 0, 0, 3] },
+            { text: comentario, style: 'subValue', margin: [0, 0, 0, 12] },
+          ]
+        : []),
+      {
+        columns: [
+          {
+            width: '*',
+            stack: [
+              { text: 'PRECIO TOTAL', style: 'label' },
+              { text: `$${this.formatMoney(precioTotal)}`, style: 'priceValue' },
+              {
+                text: `Total abonado: $${this.formatMoney(totalAbonado)}`,
+                style: 'subValue',
+                margin: [0, 2, 0, 0],
+              },
+            ],
+          },
+          {
+            width: 'auto',
+            table: {
+              body: [
+                [
+                  {
+                    text: pagado
+                      ? 'PAGADO EN SU TOTALIDAD'
+                      : `SALDO PENDIENTE: $${this.formatMoney(saldoPendiente)}`,
+                    color: pagado ? '#1E7E44' : '#fff',
+                    fillColor: pagado ? '#E1F0E5' : '#C0392B',
+                    bold: true,
+                    fontSize: 10,
+                    margin: [10, 8, 10, 8],
+                  },
+                ],
+              ],
+            },
+            layout: { hLineWidth: () => 0, vLineWidth: () => 0 },
+          },
+        ],
+        margin: [0, 6, 0, 30],
       },
       {
-        text: `Cliente: ${laburoCopy.data.cliente}   `,
-        fontSize: 16,
-        margin: [0, 8, 0, 0],
-      },
-      {
-        text: `Trabajo: ${laburoCopy.data.trabajo}, ${laburoCopy.data.detalle} `,
-        fontSize: 16,
-        margin: [0, 8, 0, 0],
-      },
-      {
-        text: `Fecha: ${fechaLaburoTexto}\nFecha de Entrega: ${fechaEntregaTexto} `,
-        fontSize: 16,
-        margin: [0, 8, 0, 0],
-      },
-      {
-        text: `Precio Total: $${this.formatMoney(
-          precioTotal
-        )}\nTotal abonado: $${this.formatMoney(totalAbonado)}\n${estadoPago}`,
-        fontSize: 16,
-        margin: [0, 8, 0, 0],
-      },
-      {
-        text: `Detalle de pagos:\n${detallePagosTexto}`,
-        fontSize: 16,
-        margin: [0, 8, 0, 0],
-      },
-      {
-        text: `Comentarios:  ${laburoCopy.data.comentario} `,
-        fontSize: 16,
-        margin: [0, 5, 0, 0],
+        text: [
+          'Las se\u00f1as no se reembolsar\u00e1n en caso de desistimiento del pedido si el trabajo ya est\u00e1 en proceso de impresi\u00f3n o armado.\n',
+          'Las fechas de entrega son estimadas y pueden variar seg\u00fan la carga de trabajo u otros factores externos.',
+        ],
+        style: 'terms',
       },
     ];
 
-    let pdfDefinition: any = {
+    const pdfDefinition: any = {
+      header: {
+        image: imagen,
+        width: 220,
+        alignment: 'right',
+        margin: [0, 10, 10, 0],
+      },
       content: [
-        ...generarContenido(),
-        {
-          text: [
-            'Las se\u00f1as no se reembolsar\u00e1n en caso de desistimiento del pedido si el trabajo ya est\u00e1 en proceso de impresi\u00f3n o armado.\n',
-            'Las fechas de entrega son estimadas y pueden variar seg\u00fan la carga de trabajo u otros factores externos.\n',
-          ],
-          fontSize: 9,
-          margin: [0, 20, 0, 10],
-          alignment: 'center',
-        },
+        ...generarContenido('CLIENTE'),
         { text: '', pageBreak: 'after' },
-        ...generarContenido(),
+        ...generarContenido('TALLER'),
         { text: '', pageBreak: 'after' },
-        ...generarContenido(),
+        ...generarContenido('ARCHIVO'),
       ],
-      footer: (currentPage: any, pageCount: any) => ({
-        margin: [10, 10, 10, 20],
+      styles: {
+        docTitle: { fontSize: 22, bold: true, color: '#2d2d2d' },
+        docNumber: { fontSize: 16, bold: true, color: '#C0392B' },
+        metaText: { fontSize: 9, color: '#6b6b6b' },
+        label: { fontSize: 8, bold: true, color: '#6b6b6b' },
+        value: { fontSize: 12, bold: true, color: '#2d2d2d', margin: [0, 2, 0, 0] },
+        subValue: { fontSize: 10, color: '#6b6b6b', margin: [0, 1, 0, 0] },
+        jobTitle: { fontSize: 13, bold: true, color: '#2d2d2d' },
+        detailText: { fontSize: 11, color: '#2d2d2d', lineHeight: 1.3, alignment: 'justify' },
+        priceValue: { fontSize: 20, bold: true, color: '#2d2d2d', margin: [0, 2, 0, 0] },
+        terms: { fontSize: 8, italics: true, color: '#6b6b6b', alignment: 'center', margin: [0, 10, 0, 0] },
+        tableHeader: { fontSize: 8, bold: true, color: '#6b6b6b' },
+        tableCell: { fontSize: 10, color: '#2d2d2d' },
+      },
+      footer: {
         columns: [
           {
-            text: 'Por consultas comunicarse al: 11 6942-8551 / 15-4084-3420   Email: artesgraficasphoenix@gmail.com',
-            fontSize: 12,
+            text: 'Por consultas comunicarse al: 11 6942-8551 / 15-4084-3420 \u00b7 artesgraficasphoenix@gmail.com',
             alignment: 'center',
+            fontSize: 9,
+            color: '#6b6b6b',
           },
         ],
-      }),
+        margin: [40, 10, 40, 0],
+      },
     };
 
     const pdf = pdfMake.createPdf(pdfDefinition);
