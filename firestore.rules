@@ -50,8 +50,8 @@ service cloud.firestore {
     }
 
     match /cuentas/{docId} {
-      allow read: if isApproved();
-      allow write: if isAdmin();
+      allow read, create: if isApproved();
+      allow update, delete: if isAdmin();
     }
 
     // movimientos son inmutables: nadie puede modificar ni borrar un pago registrado

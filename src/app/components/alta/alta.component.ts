@@ -224,10 +224,14 @@ export class AltaComponent {
       );
 
       if (!existeCuenta) {
-        await this.firebase.guardar({ nombre: nuevaCuenta }, 'cuentas');
-        this.form.controls['nuevaCuenta'].setValue('');
-        this.cuentas = await this.firebase.obtener('cuentas');
-        this.mostrarCampoNuevaCuenta = false;
+        try {
+          await this.firebase.guardar({ nombre: nuevaCuenta }, 'cuentas');
+          this.form.controls['nuevaCuenta'].setValue('');
+          this.cuentas = await this.firebase.obtener('cuentas');
+          this.mostrarCampoNuevaCuenta = false;
+        } catch (err: any) {
+          this.alerts.showErrorMessage(err?.message ?? 'No se pudo agregar la cuenta.');
+        }
       } else {
         this.alerts.showErrorMessage('La cuenta ya existe');
       }
