@@ -21,6 +21,7 @@ export class ModalPagoComponent {
   valorRestante: number = 0;
   transferencia: boolean = false;
   efectivo: boolean = false;
+  clienteInfo: any = null;
 
   constructor(
     public modalRef: MdbModalRef<ModalPagoComponent>,
@@ -34,6 +35,18 @@ export class ModalPagoComponent {
   async ngOnInit(): Promise<void> {
     this.originalLaburo = JSON.parse(JSON.stringify(this.laburo));
     this.laburoCopy = JSON.parse(JSON.stringify(this.laburo));
+
+    // clienteInfo/cuentaNombreSena/cuentaNombreFinal son campos calculados por
+    // ListadoComponent solo para mostrar en las tarjetas: no existen en el
+    // documento de Firestore y no deben volver a guardarse (ver confirmar()).
+    this.clienteInfo = this.laburoCopy.data.clienteInfo ?? null;
+    delete this.laburoCopy.data.clienteInfo;
+    delete this.laburoCopy.data.cuentaNombreSena;
+    delete this.laburoCopy.data.cuentaNombreFinal;
+    delete this.originalLaburo.data.clienteInfo;
+    delete this.originalLaburo.data.cuentaNombreSena;
+    delete this.originalLaburo.data.cuentaNombreFinal;
+
     this.cuentas = await this.firebase.obtener('cuentas');
     const precio = this.laburoCopy.data.precio || 0;
     const sena = this.laburoCopy.data.sena || 0;
@@ -106,7 +119,7 @@ export class ModalPagoComponent {
     if (bool) {
       let movimiento = new Movimiento();
       movimiento.detalle =
-        this.laburo.data.cliente +
+        (this.laburo.data.cliente || this.clienteInfo?.nombre || this.laburo.data.clienteid) +
         ', trabajo: ' +
         this.laburo.data.trabajo +
         ', detalle: ' +
@@ -135,7 +148,7 @@ export class ModalPagoComponent {
       accion: 'pago',
       entidad: 'laburo',
       entidadId: this.laburo.id,
-      descripcion: `Pago final en trabajo N°${this.laburo.data.numero} – ${this.laburo.data.cliente ?? this.laburo.data.clienteid} – $${this.valorRestante}${senaDesc}`,
+      descripcion: `Pago final en trabajo N°${this.laburo.data.numero} – ${this.laburo.data.cliente || this.clienteInfo?.nombre || this.laburo.data.clienteid} – $${this.valorRestante}${senaDesc}`,
       datoAnterior: {
         sena: this.originalLaburo.data.sena,
         pago: this.originalLaburo.data.pago,

@@ -37,6 +37,9 @@ describe('CajaComponent', () => {
           provide: ConfirmationService,
           useValue: {
             getRetiroEvent: () => of(null),
+            getDeleteEvent: () => of(null),
+            getAddPagoEvent: () => of(null),
+            getConfirmationState: () => of(false),
             setConfirmationState: () => {},
           },
         },

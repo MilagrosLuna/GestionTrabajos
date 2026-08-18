@@ -52,7 +52,7 @@ export class ModalDeleteComponent {
       accion: 'eliminacion',
       entidad: 'laburo',
       entidadId: this.laburo.id,
-      descripcion: `Eliminó trabajo N°${snapshot.data.numero} – ${snapshot.data.cliente ?? snapshot.data.clienteid}`,
+      descripcion: `Eliminó trabajo N°${snapshot.data.numero} – ${snapshot.data.cliente || snapshot.data.clienteInfo?.nombre || snapshot.data.clienteid}`,
       datoAnterior: snapshot.data,
     });
 

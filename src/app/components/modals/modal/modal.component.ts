@@ -19,7 +19,11 @@ export class ModalComponent {
   laburoCopy: any;
   originalLaburo: any;
   cuentas: any[] = [];
-  selectedCuentaId: string | undefined;
+  clienteInfo: any = null;
+  clientes: any[] = [];
+  clientesFiltered: any[] = [];
+  mostrarBusquedaCliente: boolean = false;
+  busquedaCliente: string = '';
 
   constructor(
     public modalRef: MdbModalRef<ModalComponent>,
@@ -33,13 +37,24 @@ export class ModalComponent {
   async ngOnInit(): Promise<void> {
     this.originalLaburo = JSON.parse(JSON.stringify(this.laburo));
     this.laburoCopy = JSON.parse(JSON.stringify(this.laburo));
+
+    // clienteInfo/cuentaNombreSena/cuentaNombreFinal son campos calculados por
+    // ListadoComponent solo para mostrar en las tarjetas: no existen en el
+    // documento de Firestore y no deben volver a guardarse (ver confirmar()).
+    this.clienteInfo = this.laburoCopy.data.clienteInfo ?? null;
+    delete this.laburoCopy.data.clienteInfo;
+    delete this.laburoCopy.data.cuentaNombreSena;
+    delete this.laburoCopy.data.cuentaNombreFinal;
+    delete this.originalLaburo.data.clienteInfo;
+    delete this.originalLaburo.data.cuentaNombreSena;
+    delete this.originalLaburo.data.cuentaNombreFinal;
+
     // fecha/fechaEntrega se guardan como Date -> quedan serializadas como ISO
     // completo (ej. "2026-08-11T03:00:00.000Z"). <input type="date"> solo
     // acepta "yyyy-MM-dd".
     this.laburoCopy.data.fecha = this.toDateInputValue(this.laburoCopy.data.fecha);
     this.laburoCopy.data.fechaEntrega = this.toDateInputValue(this.laburoCopy.data.fechaEntrega);
     this.cuentas = await this.firebase.obtener('cuentas');
-    this.selectedCuentaId = this.laburoCopy?.data?.cuenta;
   }
 
   private toDateInputValue(value: any): string {
@@ -63,6 +78,37 @@ export class ModalComponent {
   private toLocalDate(dateValue: string): Date {
     const [year, month, day] = dateValue.split('-').map(Number);
     return new Date(year, month - 1, day);
+  }
+
+  async toggleCambiarCliente(): Promise<void> {
+    this.mostrarBusquedaCliente = !this.mostrarBusquedaCliente;
+    this.busquedaCliente = '';
+    this.clientesFiltered = [];
+
+    if (this.mostrarBusquedaCliente && this.clientes.length === 0) {
+      this.clientes = await this.firebase.obtener('clientes');
+    }
+  }
+
+  buscarClienteEdit(): void {
+    const nombre = (this.busquedaCliente ?? '').toString().trim().toLowerCase();
+
+    if (!nombre) {
+      this.clientesFiltered = [];
+      return;
+    }
+
+    this.clientesFiltered = this.clientes.filter((cliente) =>
+      (cliente.data.nombre ?? '').toLowerCase().trim().includes(nombre)
+    );
+  }
+
+  seleccionarCliente(cliente: any): void {
+    this.laburoCopy.data.clienteid = cliente.id;
+    this.clienteInfo = cliente.data;
+    this.mostrarBusquedaCliente = false;
+    this.clientesFiltered = [];
+    this.busquedaCliente = '';
   }
 
   async confirmar() {
@@ -133,7 +179,7 @@ export class ModalComponent {
       accion: 'edicion',
       entidad: 'laburo',
       entidadId: this.laburo.id,
-      descripcion: `Editó trabajo N°${this.laburo.data.numero} – ${this.laburo.data.cliente ?? this.laburo.data.clienteid}`,
+      descripcion: `Editó trabajo N°${this.laburo.data.numero} – ${this.laburo.data.cliente || this.clienteInfo?.nombre || this.laburo.data.clienteid}`,
       datoAnterior,
       datoNuevo: this.laburo.data,
     });

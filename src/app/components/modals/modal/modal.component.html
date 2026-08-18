@@ -2,10 +2,54 @@
   <div *ngIf="laburoCopy" class="mb-3">
     <label class="mb-2">Cliente:</label>
     <input
+      *ngIf="!laburoCopy.data.clienteid"
       type="text"
+      data-test="cliente-input"
       [(ngModel)]="laburoCopy.data.cliente"
       class="form-control mb-2"
     />
+    <div *ngIf="laburoCopy.data.clienteid" class="input-group mb-2">
+      <input
+        type="text"
+        data-test="cliente-readonly"
+        [value]="clienteInfo?.nombre || laburoCopy.data.clienteid"
+        class="form-control"
+        readonly
+      />
+      <button
+        type="button"
+        class="btn btn-outline-secondary"
+        data-test="cambiar-cliente-btn"
+        (click)="toggleCambiarCliente()"
+      >
+        {{ mostrarBusquedaCliente ? 'Cancelar' : 'Cambiar cliente' }}
+      </button>
+    </div>
+
+    <div *ngIf="mostrarBusquedaCliente" class="mb-2">
+      <input
+        type="text"
+        data-test="busqueda-cliente-input"
+        [(ngModel)]="busquedaCliente"
+        (ngModelChange)="buscarClienteEdit()"
+        placeholder="Buscar cliente por nombre..."
+        class="form-control mb-2"
+      />
+      <ul class="list-group mb-2" *ngIf="clientesFiltered.length">
+        <li
+          *ngFor="let cliente of clientesFiltered"
+          class="list-group-item list-group-item-action"
+          data-test="cliente-resultado"
+          style="cursor: pointer"
+          (click)="seleccionarCliente(cliente)"
+        >
+          N° {{ cliente.data.clienteNumero }} - {{ cliente.data.nombre }} - {{ cliente.data.telefono }}
+        </li>
+      </ul>
+      <p *ngIf="busquedaCliente && !clientesFiltered.length" class="text-muted mb-2">
+        No se encontraron resultados.
+      </p>
+    </div>
 
     <label class="mb-2">Fecha Ingreso:</label>
     <input
@@ -57,17 +101,19 @@
       id="caja"
       class="form-control mb-2"
     >
+      <option value="">-- Sin seña --</option>
       <option value="efectivo">Efectivo</option>
       <option value="transferencia">Transferencia</option>
     </select>
 
     <span *ngIf="laburoCopy.data.cajaSena === 'transferencia'">
-      <label class="mb-2" for="cuentass">Cuentas Seña</label>
+      <label class="mb-2" for="cuentaSenaSelect">Cuentas Seña</label>
       <select
         class="form-control mb-2"
-        id="cuentass"
+        id="cuentaSenaSelect"
         [(ngModel)]="laburoCopy.data.cuentaSena"
       >
+        <option value="">-- Seleccionar cuenta --</option>
         <option *ngFor="let cuenta of cuentas" [value]="cuenta.id">
           {{ cuenta.data.nombre }}
         </option>
@@ -84,7 +130,7 @@
       </div>
     </span>
 
-    <span *ngIf="laburo.data.pagoEfectivo">
+    <span *ngIf="laburo.data.pagoEfectivo" data-test="pago-efectivo-block">
       <label class="mb-2">Pago final efectivo:</label>
       <input
         type="number"
@@ -108,12 +154,13 @@
         laburoCopy.data.pago > 0
       "
     >
-      <label class="mb-2" for="cuentass">Cuentas Final</label>
+      <label class="mb-2" for="cuentaFinalSelect">Cuentas Final</label>
       <select
         class="form-control mb-2"
-        id="cuentass"
+        id="cuentaFinalSelect"
         [(ngModel)]="laburoCopy.data.cuentaFinal"
       >
+        <option value="">-- Seleccionar cuenta --</option>
         <option *ngFor="let cuenta of cuentas" [value]="cuenta.id">
           {{ cuenta.data.nombre }}
         </option>

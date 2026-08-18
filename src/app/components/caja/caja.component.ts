@@ -1,5 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { MdbModalService } from 'mdb-angular-ui-kit/modal';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { Laburo } from 'src/app/clases/laburo';
 import { ConfirmationService } from 'src/app/servicesAndUtils/confirmation.service';
 import { FirebaseService } from 'src/app/servicesAndUtils/firebase.service';
@@ -11,7 +13,8 @@ import { AlertsService } from 'src/app/servicesAndUtils/alerts.service';
   templateUrl: './caja.component.html',
   styleUrls: ['./caja.component.scss'],
 })
-export class CajaComponent {
+export class CajaComponent implements OnDestroy {
+  private destroy$ = new Subject<void>();
   movimientos: any[] = [];
   esAdmin: boolean = false;
   loading: boolean = false;
@@ -31,6 +34,11 @@ export class CajaComponent {
 
     await this.subscribeToConfirmationEvents();
     this.loading = false;
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   private async initializeData(): Promise<void> {
@@ -57,9 +65,34 @@ export class CajaComponent {
   }
 
   private async subscribeToConfirmationEvents(): Promise<void> {
-    this.confirmationService.getRetiroEvent().subscribe(async () => {
-      await this.initializeData();
-    });
+    this.confirmationService.getRetiroEvent()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(async () => {
+        await this.initializeData();
+      });
+
+    // Un trabajo eliminado, editado o con un pago nuevo puede generar/modificar
+    // movimientos en efectivo: sin esto, la Caja quedaba desactualizada hasta
+    // que se recargaba la página manualmente.
+    this.confirmationService.getDeleteEvent()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(async () => {
+        await this.initializeData();
+      });
+
+    this.confirmationService.getAddPagoEvent()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(async () => {
+        await this.initializeData();
+      });
+
+    this.confirmationService.getConfirmationState()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(async (state) => {
+        if (state) {
+          await this.initializeData();
+        }
+      });
   }
 
   retirarDinero() {
